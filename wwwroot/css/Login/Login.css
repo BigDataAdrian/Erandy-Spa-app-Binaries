@@ -1,0 +1,6 @@
+﻿body {
+    background-image: url('/assets/img/Covers/Cover01.jpg');
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-size: cover;
+}

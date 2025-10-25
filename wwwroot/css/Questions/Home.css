@@ -1,0 +1,22 @@
+﻿.table-container {
+    flex: 1;
+    overflow-x: auto;
+    overflow-y: auto;
+    width: 100%;
+    height: 40vh;
+}
+
+
+.table-header thead th {
+    position: sticky;
+    top: 0;
+    background: #fff;
+    z-index: 5;
+    white-space: nowrap;
+    border-bottom: 2px solid #dee2e6;
+}
+
+.table-header td,
+.table-header th {
+    /*white-space: nowrap;*/
+}
