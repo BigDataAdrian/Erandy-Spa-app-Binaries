@@ -36,7 +36,7 @@ async function LoadQuestions() {
 
         if (response.status >= 200 && response.status <= 299) {
             const result = await response.json().catch(() => null);
-           
+
             const tbody = document.querySelector("#QuestionsTable tbody");
 
             tbody.innerHTML = "";
@@ -61,17 +61,17 @@ async function LoadQuestions() {
             `;
 
                 tbody.appendChild(tr);
-                
+
             });
         }
 
 
         if (response.status >= 400 && response.status <= 499) {
-             const result = await response.text().catch(() => null);
+            const result = await response.text().catch(() => null);
             showToast("warning", result);
         }
 
-        if (response.status >= 500 && response.status <=599) {
+        if (response.status >= 500 && response.status <= 599) {
             const result = await response.text().catch(() => null);
             showToast("danger", result);
         }
@@ -80,7 +80,7 @@ async function LoadQuestions() {
         showToast("danger", error);
     }
 }
-function DeleteQuestionModalOpen(Id,Question) {
+function DeleteQuestionModalOpen(Id, Question) {
     document.getElementById("LabelModalDeleteQuestion").innerText = Question;
     sessionStorage.setItem('QuestionIdSelected', Id);
     var DeleteQuestionModal = new bootstrap.Modal(document.getElementById("DeleteQuestionModal"));
@@ -252,6 +252,9 @@ async function AddQuestion() {
 
         if (response.status >= 200 && response.status <= 299) {
             const result = await response.text().catch(() => null);
+
+            document.getElementById("CreateModalQuestion").value = "";
+            document.getElementById("CreateModalResponse").value = "";
             showToast("success", result);
             const CreateQuestionModal = document.getElementById('CreateQuestionModal');
             const modalInstance = bootstrap.Modal.getInstance(CreateQuestionModal);
@@ -262,7 +265,7 @@ async function AddQuestion() {
                 modalInstance.hide();
             }
             LoadQuestions();
-           
+
         }
 
         if (response.status == 400 && response.status <= 499) {
@@ -288,7 +291,7 @@ async function UpdateQuestion() {
         const Module = document.getElementById("UpdateModalModule");
 
         const data = {
-            Id : Id,
+            Id: Id,
             Question: Question.value,
             Response: Response.value,
             Intention: Intention.value,
