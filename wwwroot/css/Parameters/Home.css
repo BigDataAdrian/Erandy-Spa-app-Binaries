@@ -1,0 +1,6 @@
+﻿#CardParameter, #CardGeneric {
+    flex: 1;
+    overflow-y: auto;
+    height: calc(100vh - 370px);
+    transition: height 0.15s ease;
+}

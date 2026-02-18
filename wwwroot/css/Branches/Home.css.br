@@ -1,0 +1,4 @@
+€ï»¿#CardSucursales {
+    height: calc(100vh - 210px);
+}
+

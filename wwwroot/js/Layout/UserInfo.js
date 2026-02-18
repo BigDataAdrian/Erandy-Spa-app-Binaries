@@ -1,5 +1,12 @@
 ﻿document.addEventListener("DOMContentLoaded", () => {
+    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
+    const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
+
+    const switchDarkMode = document.getElementById("SwitchDarkMode");
+    switchDarkMode.addEventListener("change", SwitchDarkMode);
+
     GetUserInfo();
+    LoadSavedTheme();
 });
 async function GetUserInfo() {
     try {
@@ -58,4 +65,44 @@ async function setActiveMenu(menu, opcion) {
     } catch (error) {
         console.error("Error loading user:", error);
     }
+}
+const SELECTOR_SIDEBAR_WRAPPER = ".sidebar-wrapper";
+const Default = {
+    scrollbarTheme: "os-theme-light",
+    scrollbarAutoHide: "leave",
+    scrollbarClickScroll: true
+}
+
+document.addEventListener("DOMContentLoaded", function () {
+    const sidebarWrapper = document.querySelector(SELECTOR_SIDEBAR_WRAPPER);
+
+    if (sidebarWrapper) {
+        OverlayScrollbarsGlobal.OverlayScrollbars(sidebarWrapper, {
+            scrollbars: {
+                theme: Default.scrollbarTheme,
+                autoHide: Default.scrollbarAutoHide,
+                clickScroll: Default.scrollbarClickScroll
+            }
+        });
+    }
+});
+
+function SwitchDarkMode() {
+    const switchDarkMode = document.getElementById("SwitchDarkMode");
+    const body = document.body;
+    const aside = document.querySelector("aside");
+
+    const newTheme = switchDarkMode.checked ? "dark" : "light";
+    body.setAttribute("data-bs-theme", newTheme);
+    aside.setAttribute("data-bs-theme", newTheme);
+    localStorage.setItem("theme", newTheme);
+}
+function LoadSavedTheme() {
+    const body = document.body;
+    const aside = document.querySelector("aside");
+    const switchDarkMode = document.getElementById("SwitchDarkMode");
+    const savedTheme = localStorage.getItem("theme") || "light";
+    body.setAttribute("data-bs-theme", savedTheme);
+    aside.setAttribute("data-bs-theme", savedTheme);
+    switchDarkMode.checked = savedTheme === "dark";
 }

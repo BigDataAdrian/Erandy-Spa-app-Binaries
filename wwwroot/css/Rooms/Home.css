@@ -1,0 +1,41 @@
+﻿#BranchesSuggestions {
+    max-height: 200px;
+    overflow-y: auto;
+    display: none;
+    top: 100%;
+    left: 0;
+    background-color: #fff;
+    border: 1px solid #ced4da;
+    border-top: none;
+    z-index: 1050;
+}
+
+.suggestion-item {
+    cursor: pointer;
+}
+
+    .suggestion-item:hover {
+        background-color: #f8f9fa;
+    }
+
+.table-container {
+    flex: 1;
+    overflow-x: auto;
+    overflow-y: auto;
+    width: 100%;
+    height: calc(100vh - 551px);
+    max-height: 100%;
+}
+
+
+.table-header thead th {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    white-space: nowrap;
+    border-bottom: 2px solid #dee2e6;
+}
+
+#CardRooms {
+    display: none;
+}
