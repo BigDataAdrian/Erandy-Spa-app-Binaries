@@ -1,6 +1,11 @@
 ﻿document.addEventListener("DOMContentLoaded", () => {
     setActiveMenu("TherapistsModule", "TherapistsModuleHome");
-    LoadTherapists();
+
+    LoadBranches();
+    const branchesSelect = document.getElementById('branchesSelect');
+    branchesSelect.addEventListener('change', async () => {
+        LoadTherapists();
+    });
 
     const BtnCreateTherapistModal = document.getElementById('BtnCreateTherapistModal');
     BtnCreateTherapistModal.addEventListener('click', async () => {
@@ -26,9 +31,9 @@ function CreateTherapistModalOpen() {
     var CreateTherapistModal = new bootstrap.Modal(document.getElementById("CreateTherapistModal"));
     CreateTherapistModal.show();
 }
-async function LoadTherapists() {
+async function LoadBranches() {
     try {
-        const response = await fetch(`/Therapists/GetTherapists`, {
+        const response = await fetch(`/Therapists/GetBranchesSelect`, {
             method: "GET",
             headers: {
                 "Content-Type": "application/json"
@@ -38,6 +43,48 @@ async function LoadTherapists() {
         if (response.status >= 200 && response.status <= 299) {
             const result = await response.json().catch(() => null);
 
+            const select = document.getElementById("branchesSelect");
+
+            select.innerHTML = '<option value="" selected disabled>Seleccione una sucursal...</option>';
+
+            if (result && result.length > 0) {
+                result.forEach(item => {
+                    const option = document.createElement("option");
+                    option.value = item.value;
+                    option.textContent = item.description;
+                    select.appendChild(option);
+                });
+            }
+        }
+
+
+        if (response.status >= 400 && response.status <= 499) {
+            const result = await response.text().catch(() => null);
+            showToast("warning", result);
+        }
+
+        if (response.status >= 500 && response.status <= 599) {
+            const result = await response.text().catch(() => null);
+            showToast("danger", result);
+        }
+
+    } catch (error) {
+        showToast("danger", error);
+    }
+}
+async function LoadTherapists() {
+    try {
+        const branchesSelect = document.getElementById('branchesSelect');
+        const response = await fetch(`/Therapists/GetTherapists?BranchId=` + branchesSelect.value, {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json"
+            }
+        });
+
+        if (response.status >= 200 && response.status <= 299) {
+            const result = await response.json().catch(() => null);
+            document.getElementById('CardTherapists').style.display = "flex";
             const tbody = document.querySelector("#TherapistsTable tbody");
 
             tbody.innerHTML = "";
@@ -141,11 +188,13 @@ async function DeleteTherapist() {
 }
 async function AddTherapist() {
     try {
+        const branchesSelect = document.getElementById('branchesSelect');
         const Name = document.getElementById("CreateModalName");
         const Enabled = document.getElementById("CreateModalEnabled");
         const data = {
             Name: Name.value,
-            Enabled: Enabled.checked
+            Enabled: Enabled.checked,
+            BranchId: branchesSelect.value
         };
         const response = await fetch("/Therapists/AddTherapist", {
             method: "POST",
@@ -243,4 +292,4 @@ function UpdateTherapistModalOpen(Id, Name, Enabled) {
 
     var UpdateTherapistModal = new bootstrap.Modal(document.getElementById("UpdateTherapistModal"));
     UpdateTherapistModal.show();
-}
+} 
