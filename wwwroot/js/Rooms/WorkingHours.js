@@ -2,14 +2,14 @@
     setActiveMenu("RoomsModule", "RoomsModuleWorkingHours");
     LoadBranches();
 
-    document.getElementById("branchesSelect").addEventListener("change", function() {
+    document.getElementById("branchesSelect").addEventListener("change", function () {
 
         const select = document.getElementById("roomsSelect");
         select.disabled = false;
         LoadRooms();
     });
 
-      document.getElementById("roomsSelect").addEventListener("change", function() {
+    document.getElementById("roomsSelect").addEventListener("change", function () {
         const roomId = this.value;
         if (roomId) {
             LoadWorkingHours(roomId);
@@ -159,7 +159,7 @@ function EditHours(id, day, start, end) {
     const inputStart = document.getElementById('UpdateStartTime');
     const inputEnd = document.getElementById('UpdateEndTime');
     const btnUpdate = document.getElementById('btnUpdateZone');
-    
+
     daySpan.textContent = day;
 
     inputStart.value = (start === "No establecido") ? "" : start;

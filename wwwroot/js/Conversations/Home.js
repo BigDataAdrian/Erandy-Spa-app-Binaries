@@ -86,7 +86,7 @@ async function LoadMessages() {
 
         if (response.status >= 200 && response.status < 300) {
             const data = await response.json();
-            messagesContainer.innerHTML = ''; // Limpiar chat
+            messagesContainer.innerHTML = '';
 
             data.forEach(group => {
                 // 1. Insertar el separador de fecha

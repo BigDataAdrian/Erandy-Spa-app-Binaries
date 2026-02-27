@@ -2,14 +2,13 @@
     setActiveMenu("TherapistsModule", "TherapistsModuleWorkingHours");
     LoadBranches();
 
-    document.getElementById("branchesSelect").addEventListener("change", function() {
-
+    document.getElementById("branchesSelect").addEventListener("change", function () {
         const select = document.getElementById("therapistsSelect");
         select.disabled = false;
         LoadTherapists();
     });
 
-      document.getElementById("therapistsSelect").addEventListener("change", function() {
+    document.getElementById("therapistsSelect").addEventListener("change", function () {
         const therapistId = this.value;
         if (therapistId) {
             LoadWorkingHours(therapistId);
@@ -159,7 +158,7 @@ function EditHours(id, day, start, end) {
     const inputStart = document.getElementById('UpdateStartTime');
     const inputEnd = document.getElementById('UpdateEndTime');
     const btnUpdate = document.getElementById('btnUpdateZone');
-    
+
     daySpan.textContent = day;
 
     inputStart.value = (start === "No establecido") ? "" : start;
