@@ -1,11 +1,9 @@
 ﻿document.addEventListener("DOMContentLoaded", () => {
-    setActiveMenu("RoomsModule", "RoomsModuleSingleBlockings");
+    setActiveMenu("BranchesModule", "BranchesModuleRecurringBlockings");
     LoadBranches();
     LoadReasons();
-    document.getElementById("branchesSelect").addEventListener("change", function () {
-        const select = document.getElementById("roomsSelect");
-        select.disabled = false;
-        LoadRooms();
+    document.getElementById("brancheSelect").addEventListener("change", function () {
+        LoadRecurringBlockings();
     });
 
     const BtnCreateBlockingModal = document.getElementById('BtnCreateBlockingModal');
@@ -23,19 +21,16 @@
         await UpdateBlocking();
     });
 
-    document.getElementById("roomsSelect").addEventListener("change", function () {
-        LoadSingleBlockings();
-    });
-
     const BtnDeleteBlocking = document.getElementById('BtnDeleteBlocking');
     BtnDeleteBlocking.addEventListener('click', async () => {
-        await DeleteSingleBlocking();
+        await DeleteRecurringBlocking();
     });
+
 });
 
 async function LoadBranches() {
     try {
-        const response = await fetch(`/Rooms/GetBranchesSelect`, {
+        const response = await fetch(`/Branches/GetBranchesSelect`, {
             method: "GET",
             headers: {
                 "Content-Type": "application/json"
@@ -45,51 +40,9 @@ async function LoadBranches() {
         if (response.status >= 200 && response.status <= 299) {
             const result = await response.json().catch(() => null);
 
-            const select = document.getElementById("branchesSelect");
+            const select = document.getElementById("brancheSelect");
 
             select.innerHTML = '<option value="" selected disabled>Seleccione una sucursal...</option>';
-
-            if (result && result.length > 0) {
-                result.forEach(item => {
-                    const option = document.createElement("option");
-                    option.value = item.value;
-                    option.textContent = item.description;
-                    select.appendChild(option);
-                });
-            }
-        }
-
-
-        if (response.status >= 400 && response.status <= 499) {
-            const result = await response.text().catch(() => null);
-            showToast("warning", result);
-        }
-
-        if (response.status >= 500 && response.status <= 599) {
-            const result = await response.text().catch(() => null);
-            showToast("danger", result);
-        }
-
-    } catch (error) {
-        showToast("danger", error);
-    }
-}
-async function LoadRooms() {
-    try {
-        const Branch = document.getElementById('branchesSelect');
-        const response = await fetch(`/Rooms/GetRoomsSelect?BranchId=` + Branch.value, {
-            method: "GET",
-            headers: {
-                "Content-Type": "application/json"
-            }
-        });
-
-        if (response.status >= 200 && response.status <= 299) {
-            const result = await response.json().catch(() => null);
-
-            const select = document.getElementById("roomsSelect");
-
-            select.innerHTML = '<option value="" selected disabled>Seleccione una habitacion...</option>';
 
             if (result && result.length > 0) {
                 result.forEach(item => {
@@ -129,7 +82,7 @@ async function LoadReasons() {
             const result = await response.json().catch(() => null);
 
             const createSelect = document.getElementById("CreateModalReason");
-            const updateSelect = document.getElementById("UpdateModalReason");
+            const updateSelect = document.getElementById("UpdateReason");
 
             const defaultOption = '<option value="" selected disabled>Seleccione una razon...</option>';
             if (createSelect) createSelect.innerHTML = defaultOption;
@@ -168,11 +121,11 @@ async function LoadReasons() {
         showToast("danger", error);
     }
 }
-async function LoadSingleBlockings() {
-    const Room = document.getElementById("roomsSelect");
+async function LoadRecurringBlockings() {
+    const Branch = document.getElementById("brancheSelect");
     document.getElementById('CardBlockings').style.display = "flex";
     try {
-        const response = await fetch(`/Rooms/GetSingleBlockingsTable?RoomId=${Room.value}`, {
+        const response = await fetch(`/Branches/GetRecurringBlockingsTable?BranchId=${Branch.value}`, {
             method: "GET",
             headers: {
                 "Content-Type": "application/json"
@@ -208,6 +161,9 @@ async function LoadSingleBlockings() {
                         <td>${item.description}</td>
                         <td>${item.startDate}</td>
                         <td>${item.endDate}</td>
+                        <td>${item.startTime}</td>
+                        <td>${item.endTime}</td>
+                        <td>${item.rule}</td>
                         <td>${item.reason}</td>
                         <td>${Status}</td>
                         <td>
@@ -252,7 +208,7 @@ function CreateBlockingModalOpen() {
 }
 async function AddBlocking() {
     try {
-        const Room = document.getElementById("roomsSelect");
+        const Branch = document.getElementById("brancheSelect");
         const StartDate = document.getElementById("StartDate").value;
         const StartTime = document.getElementById("StartTime").value;
         const EndDate = document.getElementById("EndDate").value;
@@ -261,16 +217,42 @@ async function AddBlocking() {
         const Reason = document.getElementById("CreateModalReason").value;
         const Enabled = document.getElementById("availability").checked;
 
-        const data = {
-            RoomId: Room.value,
-            Description: Description,
-            StartDateTime: `${StartDate}T${StartTime}`,
-            EndDateTime: `${EndDate}T${EndTime}`,
-            ReasonTypeId: parseInt(Reason),
-            Enabled: Enabled
+        const dayCodes = {
+            "checkLunes": "MO",
+            "checkMartes": "TU",
+            "checkMiercoles": "WE",
+            "checkJueves": "TH",
+            "checkViernes": "FR",
+            "checkSabado": "SA",
+            "checkDomingo": "SU"
         };
 
-        const response = await fetch("/Rooms/AddBlocking", {
+        let selectedDays = [];
+        for (const [id, code] of Object.entries(dayCodes)) {
+            const el = document.getElementById(id);
+            if (el && el.checked) {
+                selectedDays.push(code);
+            }
+        }
+
+        let recurringRule = "";
+        if (selectedDays.length > 0) {
+            recurringRule = `FREQ=WEEKLY;BYDAY=${selectedDays.join(",")}`;
+        }
+
+        const data = {
+            BranchId: Branch.value,
+            Description: Description,
+            ReasonTypeId: parseInt(Reason),
+            Enabled: Enabled,
+            RecurringRule: recurringRule,
+            RecurringStartDate: StartDate,
+            RecurringEndDate: EndDate,
+            StartTime: StartTime,
+            EndTime: EndTime
+        };
+
+        const response = await fetch("/Branches/AddRecurringBlocking", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
@@ -281,110 +263,140 @@ async function AddBlocking() {
         if (response.status >= 200 && response.status <= 299) {
             const result = await response.text().catch(() => null);
 
-            document.getElementById("StartDate").value = "";
-            document.getElementById("StartTime").value = "";
-            document.getElementById("EndDate").value = "";
-            document.getElementById("EndTime").value = "";
-            document.getElementById("CreateModalDescription").value = "";
-            document.getElementById("CreateModalReason").value = "";
+            ["StartDate", "StartTime", "EndDate", "EndTime", "CreateModalDescription", "CreateModalReason"].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.value = "";
+            });
+
+            Object.keys(dayCodes).forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.checked = false;
+            });
+
+            document.getElementById("availability").checked = false;
 
             showToast("success", result);
 
-            const CreateBlockingModal = document.getElementById('CreateBlockingModal');
-            const modalInstance = bootstrap.Modal.getInstance(CreateBlockingModal);
+            const modalEl = document.getElementById('CreateBlockingModal');
+            const modalInstance = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+            modalInstance.hide();
 
-            if (!modalInstance) {
-                new bootstrap.Modal(CreateBlockingModal).hide();
-            } else {
-                modalInstance.hide();
-            }
-            LoadSingleBlockings();
-        }
-
-        if (response.status >= 400 && response.status <= 499) {
-            const result = await response.text().catch(() => null);
-            showToast("warning", result);
-        }
-
-        if (response.status >= 500 && response.status <= 599) {
-            const result = await response.text().catch(() => null);
-            showToast("danger", result);
+            LoadRecurringBlockings();
+        } else {
+            const result = await response.text().catch(() => "Error desconocido");
+            showToast(response.status >= 500 ? "danger" : "warning", result);
         }
     } catch (error) {
-        showToast("danger", error);
+        showToast("danger", error.message || error);
     }
 }
 async function UpdateBlockingModalOpen(BlockingId) {
     try {
-        const response = await fetch(`/Rooms/GetSingleBlocking?BlockingId=${BlockingId}`, {
+        const response = await fetch(`/Branches/GetRecurringBlocking?BlockingId=${BlockingId}`, {
             method: "GET",
-            headers: {
-                "Content-Type": "application/json"
-            }
+            headers: { "Content-Type": "application/json" }
         });
 
-        if (response.status >= 200 && response.status <= 299) {
-            const result = await response.json().catch(() => null);
+        if (response.ok) {
+            const result = await response.json();
             sessionStorage.setItem("BlockingSelected", BlockingId);
-            const startDateTime = new Date(result.startDate);
-            const endDateTime = new Date(result.endDate);
 
-            const startDate = startDateTime.toISOString().split('T')[0];
-            const endDate = endDateTime.toISOString().split('T')[0];
+            document.getElementById("UpdateStartDate").value = result.startDate;
+            document.getElementById("UpdateEndDate").value = result.endDate;
+            document.getElementById("UpdateStartTime").value = result.startTime.substring(0, 5);
+            document.getElementById("UpdateEndTime").value = result.endTime.substring(0, 5);
+            document.getElementById("UpdateDescription").value = result.description;
+            document.getElementById("UpdateReason").value = result.reasonId;
+            document.getElementById("UpdateAvailability").checked = result.enabled;
 
-            const startTime = startDateTime.toTimeString().substring(0, 5);
-            const endTime = endDateTime.toTimeString().substring(0, 5);
+            const dayMap = {
+                "MO": "UpdatecheckLunes",
+                "TU": "UpdatecheckMartes",
+                "WE": "UpdatecheckMiercoles",
+                "TH": "UpdatecheckJueves",
+                "FR": "UpdatecheckViernes",
+                "SA": "UpdatecheckSabado",
+                "SU": "UpdatecheckDomingo"
+            };
 
-            document.getElementById("UpdateStartDate").value = startDate;
-            document.getElementById("UpdateStartTime").value = startTime;
-            document.getElementById("UpdateEndDate").value = endDate;
-            document.getElementById("UpdateEndTime").value = endTime;
-            document.getElementById("UpdateModalDescription").value = result.description;
+            Object.values(dayMap).forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.checked = false;
+            });
 
-            document.getElementById("UpdateModalReason").value = result.reasonId;
+            if (result.rule && result.rule.includes("BYDAY=")) {
+                const daysPart = result.rule.split("BYDAY=")[1];
+                const daysArray = daysPart.split(",");
 
-            document.getElementById("Updateavailability").checked = result.enabled;
+                daysArray.forEach(dayCode => {
+                    const checkboxId = dayMap[dayCode];
+                    if (checkboxId) {
+                        const checkbox = document.getElementById(checkboxId);
+                        if (checkbox) checkbox.checked = true;
+                    }
+                });
+            }
 
             const modalElement = document.getElementById('UpdateBlockingModal');
             const modalInstance = bootstrap.Modal.getOrCreateInstance(modalElement);
             modalInstance.show();
-        }
 
-        if (response.status >= 400 && response.status <= 499) {
-            const result = await response.text().catch(() => null);
-            showToast("warning", result);
-        }
-
-        if (response.status >= 500 && response.status <= 599) {
-            const result = await response.text().catch(() => null);
-            showToast("danger", result);
+        } else {
+            const errorText = await response.text();
+            showToast("warning", errorText);
         }
 
     } catch (error) {
-        showToast("danger", error);
+        showToast("danger", "Error de conexión: " + error.message);
     }
 }
 async function UpdateBlocking() {
     try {
+        const BlockingId = sessionStorage.getItem("BlockingSelected");
         const StartDate = document.getElementById("UpdateStartDate").value;
         const StartTime = document.getElementById("UpdateStartTime").value;
         const EndDate = document.getElementById("UpdateEndDate").value;
         const EndTime = document.getElementById("UpdateEndTime").value;
-        const Description = document.getElementById("UpdateModalDescription").value;
-        const Reason = document.getElementById("UpdateModalReason").value;
-        const Enabled = document.getElementById("Updateavailability").checked;
-        const BlockingSelected = sessionStorage.getItem("BlockingSelected");
+        const Description = document.getElementById("UpdateDescription").value;
+        const Reason = document.getElementById("UpdateReason").value;
+        const Enabled = document.getElementById("UpdateAvailability").checked;
 
-        const data = {
-            BlockingId: BlockingSelected,
-            Description: Description,
-            StartDateTime: `${StartDate}T${StartTime}`,
-            EndDateTime: `${EndDate}T${EndTime}`,
-            ReasonTypeId: parseInt(Reason),
-            Enabled: Enabled
+        const dayCodes = {
+            "UpdatecheckLunes": "MO",
+            "UpdatecheckMartes": "TU",
+            "UpdatecheckMiercoles": "WE",
+            "UpdatecheckJueves": "TH",
+            "UpdatecheckViernes": "FR",
+            "UpdatecheckSabado": "SA",
+            "UpdatecheckDomingo": "SU"
         };
 
-        const response = await fetch("/Rooms/UpdateBlocking", {
+        let selectedDays = [];
+        for (const [id, code] of Object.entries(dayCodes)) {
+            const el = document.getElementById(id);
+            if (el && el.checked) {
+                selectedDays.push(code);
+            }
+        }
+
+        let recurringRule = "";
+        if (selectedDays.length > 0) {
+            recurringRule = `FREQ=WEEKLY;BYDAY=${selectedDays.join(",")}`;
+        }
+
+        const data = {
+            Id: parseInt(BlockingId),
+            Description: Description,
+            ReasonId: parseInt(Reason),
+            Enabled: Enabled,
+            Rule: recurringRule,
+            StartDate: StartDate,
+            EndDate: EndDate,
+            StartTime: StartTime,
+            EndTime: EndTime
+        };
+
+        const response = await fetch("/Branches/UpdateRecurringBlocking", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
@@ -392,41 +404,23 @@ async function UpdateBlocking() {
             body: JSON.stringify(data)
         });
 
-        if (response.status >= 200 && response.status <= 299) {
-            const result = await response.text().catch(() => null);
+        if (response.ok) {
+            const result = await response.text();
+            showToast("success", result || "Bloqueo actualizado correctamente");
 
-            document.getElementById("UpdateStartDate").value = "";
-            document.getElementById("UpdateStartTime").value = "";
-            document.getElementById("UpdateEndDate").value = "";
-            document.getElementById("UpdateEndTime").value = "";
-            document.getElementById("UpdateModalDescription").value = "";
-            document.getElementById("UpdateModalReason").value = "";
-            document.getElementById("Updateavailability").checked = false;
+            const modalEl = document.getElementById('UpdateBlockingModal');
+            const modalInstance = bootstrap.Modal.getInstance(modalEl);
+            if (modalInstance) modalInstance.hide();
 
-            showToast("success", result);
-
-            const UpdateBlockingModal = document.getElementById('UpdateBlockingModal');
-            const modalInstance = bootstrap.Modal.getInstance(UpdateBlockingModal);
-
-            if (!modalInstance) {
-                new bootstrap.Modal(UpdateBlockingModal).hide();
-            } else {
-                modalInstance.hide();
-            }
-            LoadSingleBlockings();
+            LoadRecurringBlockings();
+        } else {
+            const errorText = await response.text();
+            showToast(response.status >= 500 ? "danger" : "warning", errorText);
         }
 
-        if (response.status >= 400 && response.status <= 499) {
-            const result = await response.text().catch(() => null);
-            showToast("warning", result);
-        }
-
-        if (response.status >= 500 && response.status <= 599) {
-            const result = await response.text().catch(() => null);
-            showToast("danger", result);
-        }
     } catch (error) {
-        showToast("danger", error);
+        console.error(error);
+        showToast("danger", "Error al procesar la solicitud");
     }
 }
 function DeleteBlockingModalOpen(Id, Description) {
@@ -435,11 +429,11 @@ function DeleteBlockingModalOpen(Id, Description) {
     var DeleteBlockingModal = new bootstrap.Modal(document.getElementById("DeleteBlockingModal"));
     DeleteBlockingModal.show();
 }
-async function DeleteSingleBlocking() {
+async function DeleteRecurringBlocking() {
     try {
-        const Blocking = sessionStorage.getItem('BlockingIdSelected');
+            const Blocking = sessionStorage.getItem('BlockingIdSelected');
 
-        const response = await fetch("/Rooms/DeleteSingleBlocking?BlockingId=" + Blocking, {
+        const response = await fetch("/Branches/DeleteRecurringBlocking?BlockingId=" + Blocking, {
             method: "DELETE"
         });
 
@@ -456,7 +450,7 @@ async function DeleteSingleBlocking() {
             } else {
                 modalInstance.hide();
             }
-            LoadSingleBlockings();
+            LoadRecurringBlockings();
         }
 
         if (response.status >= 400 && response.status <= 499) {

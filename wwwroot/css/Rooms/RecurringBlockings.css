@@ -28,3 +28,7 @@
     overflow-x: auto;
     width: 100%;
 }
+
+#CardBlockings {
+    display: none;
+}
