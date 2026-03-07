@@ -1,6 +1,30 @@
-﻿#CardParameter, #CardGeneric {
-    flex: 1;
-    overflow-y: auto;
-    height: calc(100vh - 370px);
-    transition: height 0.15s ease;
+﻿
+#Parameter {
+    height: calc(100vh - 525px);
+    width: 100%;
+    resize: vertical;
+    min-height: 100px;
+}
+
+.maximized-card {
+    display: flex !important;
+    flex-direction: column;
+}
+
+    .maximized-card .card-body,
+    .maximized-card .card-body > .row,
+    .maximized-card .card-body > .row > .col-md-12 {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .maximized-card #Parameter {
+        height: 100% !important; 
+        flex: 1;
+        resize: none;
+    }
+
+#CardMessages {
+    display: none;
 }

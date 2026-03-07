@@ -31,7 +31,7 @@ async function LoadParametersSelect() {
             options.forEach(r => {
                 const option = document.createElement("option");
                 option.value = r.id;
-                option.textContent = `${r.name}`;
+                option.textContent = `${r.value}`;
                 select.appendChild(option);
             });
 
@@ -69,8 +69,8 @@ async function LoadParameter() {
 
         if (response.status >= 200 && response.status < 300) {
             const result = await response.json().catch(() => null);
-
             document.getElementById("Parameter").value = result.value;
+            document.getElementById("CardMessages").style.display = "flex";
         }
 
         if (response.status >= 400 && response.status < 500) {
@@ -91,11 +91,9 @@ async function SaveParameter() {
     try {
         const Parameter = document.getElementById("Parameters");
         const Value = document.getElementById("Parameter");
-        const Generic = document.getElementById("Generic");
         const data = {
             ParameterId: Parameter.value,
-            Value: Value.value,
-            Generic: Generic.value
+            Value: Value.value
         };
 
         const response = await fetch("/Parameters/UpdateParameter", {
