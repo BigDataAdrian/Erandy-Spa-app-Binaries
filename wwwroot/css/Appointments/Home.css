@@ -1,58 +1,30 @@
-﻿.fc-daygrid-day-top {
-    cursor: pointer;
+﻿.card.maximized-card
+.table-container {
+    height: 100% !important;
+    max-height: 100%;
 }
 
-.fc-event {
-    cursor: pointer !important;
+.table-no-wrap td,
+.table-no-wrap th {
+    white-space: nowrap;
 }
 
-.fc-bg-event {
-    background-color: red;
+.table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
 }
-
-.fc-daygrid-event .fc-event-title {
-    white-space: normal !important;
-    line-height: 1.1;
-}
-
-.fc-daygrid-event {
-    padding: 2px 4px !important;
-}
-
-    .fc-daygrid-event .fc-event-title,
-    .fc-daygrid-event .fc-event-time {
-        white-space: normal !important;
-        font-size: 11px;
-    }
-
-#CardCalendar {
-    height: calc(100vh - 210px);
-    display: flex;
-    flex-direction: column;
-    transition: all 0.3s ease; 
-}
-
-    #CardCalendar.maximized {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100vw;
-        height: 100vh !important;
-        z-index: 1050;
-        margin: 0;
-        border-radius: 0;
-    }
-
-    #CardCalendar .card-body {
-        flex: 1;
-        overflow: hidden;
-        display: flex;
-        flex-direction: column;
-    }
 
 .table-container {
     flex: 1;
     overflow-y: auto;
-    overflow-x: auto;
-    width: 100%;
+    height: calc(100vh - 300px);
+    transition: height 0.15s ease;
+}
+
+.table-container-request {
+    flex: 1;
+    overflow-y: auto;
+    height: calc(100vh - 700px);
+    transition: height 0.15s ease;
 }
