@@ -1,12 +1,10 @@
-﻿/* Estado Normal */
-#CardBlockings {
+﻿#CardBlockings {
     height: calc(100vh - 400px);
     display: flex;
     flex-direction: column;
-    transition: all 0.3s ease; /* Opcional: para que el cambio sea suave */
+    transition: all 0.3s ease;
 }
 
-    /* Estado Maximizado (Esta clase la debe poner tu JS) */
     #CardBlockings.maximized {
         position: fixed;
         top: 0;
@@ -30,4 +28,7 @@
     overflow-y: auto;
     overflow-x: auto;
     width: 100%;
+}
+#CardBlockings {
+    display: none;
 }

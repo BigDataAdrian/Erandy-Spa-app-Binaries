@@ -1,4 +1,28 @@
-﻿#CardTherapists {
-    height: calc(100vh - 400px);
-    display: none;
+﻿
+.card.maximized-card {
+    height: 100vh !important;
+    display: flex;
+}
+
+    .card.maximized-card .card-body {
+        flex: 1;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+    }
+
+.table-container {
+    overflow-y: auto;
+    overflow-x: auto;
+    flex-grow: 1;
+}
+
+.table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+#CardTherapists:not(.maximized-card) .table-container {
+    height: calc(100vh - 360px);
 }

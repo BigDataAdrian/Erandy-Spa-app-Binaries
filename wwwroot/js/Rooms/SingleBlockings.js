@@ -1,12 +1,7 @@
 ﻿document.addEventListener("DOMContentLoaded", () => {
     setActiveMenu("RoomsModule", "RoomsModuleSingleBlockings");
-    LoadBranches();
+    LoadRooms();
     LoadReasons();
-    document.getElementById("branchesSelect").addEventListener("change", function () {
-        const select = document.getElementById("roomsSelect");
-        select.disabled = false;
-        LoadRooms();
-    });
 
     const BtnCreateBlockingModal = document.getElementById('BtnCreateBlockingModal');
     BtnCreateBlockingModal.addEventListener('click', async () => {
@@ -33,51 +28,9 @@
     });
 });
 
-async function LoadBranches() {
-    try {
-        const response = await fetch(`/Rooms/GetBranchesSelect`, {
-            method: "GET",
-            headers: {
-                "Content-Type": "application/json"
-            }
-        });
-
-        if (response.status >= 200 && response.status <= 299) {
-            const result = await response.json().catch(() => null);
-
-            const select = document.getElementById("branchesSelect");
-
-            select.innerHTML = '<option value="" selected disabled>Seleccione una sucursal...</option>';
-
-            if (result && result.length > 0) {
-                result.forEach(item => {
-                    const option = document.createElement("option");
-                    option.value = item.value;
-                    option.textContent = item.description;
-                    select.appendChild(option);
-                });
-            }
-        }
-
-
-        if (response.status >= 400 && response.status <= 499) {
-            const result = await response.text().catch(() => null);
-            showToast("warning", result);
-        }
-
-        if (response.status >= 500 && response.status <= 599) {
-            const result = await response.text().catch(() => null);
-            showToast("danger", result);
-        }
-
-    } catch (error) {
-        showToast("danger", error);
-    }
-}
 async function LoadRooms() {
     try {
-        const Branch = document.getElementById('branchesSelect');
-        const response = await fetch(`/Rooms/GetRoomsSelect?BranchId=` + Branch.value, {
+        const response = await fetch(`/Rooms/GetRoomsSelect`, {
             method: "GET",
             headers: {
                 "Content-Type": "application/json"
@@ -118,7 +71,7 @@ async function LoadRooms() {
 }
 async function LoadReasons() {
     try {
-        const response = await fetch(`/Branches/GetReasonsSelect`, {
+        const response = await fetch(`/Rooms/GetReasonsSelect`, {
             method: "GET",
             headers: {
                 "Content-Type": "application/json"
@@ -129,7 +82,7 @@ async function LoadReasons() {
             const result = await response.json().catch(() => null);
 
             const createSelect = document.getElementById("CreateModalReason");
-            const updateSelect = document.getElementById("UpdateModalReason");
+            const updateSelect = document.getElementById("UpdateReason");
 
             const defaultOption = '<option value="" selected disabled>Seleccione una razon...</option>';
             if (createSelect) createSelect.innerHTML = defaultOption;

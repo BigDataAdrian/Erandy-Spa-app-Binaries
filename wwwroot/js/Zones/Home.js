@@ -1,34 +1,31 @@
 ﻿document.addEventListener("DOMContentLoaded", () => {
-    setActiveMenu("TherapistsModule", "TherapistsModuleHome");
-    LoadTherapists();
+    setActiveMenu("ZonesModule", "ZonesModuleHome");
+    LoadZones();
 
-    const BtnCreateTherapistModal = document.getElementById('BtnCreateTherapistModal');
-    BtnCreateTherapistModal.addEventListener('click', async () => {
-        await CreateTherapistModalOpen();
+    const BtnDeleteZone = document.getElementById('BtnDeleteZone');
+    BtnDeleteZone.addEventListener('click', async () => {
+        await DeleteZone();
     });
 
-    const BtnCreateTherapist = document.getElementById('BtnCreateTherapist');
-    BtnCreateTherapist.addEventListener('click', async () => {
-        await AddTherapist();
+    const BtnCreateZoneModal = document.getElementById('BtnCreateZoneModal');
+    BtnCreateZoneModal.addEventListener('click', async () => {
+        await CreateZoneModalOpen();
     });
 
-    const BtnDeleteTherapist = document.getElementById('BtnDeleteTherapist');
-    BtnDeleteTherapist.addEventListener('click', async () => {
-        await DeleteTherapist();
+    const BtnCreateQuestion = document.getElementById('BtnCreateZone');
+    BtnCreateQuestion.addEventListener('click', async () => {
+        await AddZone();
     });
 
-    const BtnUpdateTherapist = document.getElementById('BtnUpdateTherapist');
-    BtnUpdateTherapist.addEventListener('click', async () => {
-        await UpdateTherapist();
+    const BtnUpdateZone = document.getElementById('BtnUpdateZone');
+    BtnUpdateZone.addEventListener('click', async () => {
+        await UpdateZone();
     });
 });
-function CreateTherapistModalOpen() {
-    var CreateTherapistModal = new bootstrap.Modal(document.getElementById("CreateTherapistModal"));
-    CreateTherapistModal.show();
-}
-async function LoadTherapists() {
+
+async function LoadZones() {
     try {
-        const response = await fetch(`/Therapists/GetTherapists`, {
+        const response = await fetch(`/Zones/GetZones`, {
             method: "GET",
             headers: {
                 "Content-Type": "application/json"
@@ -37,8 +34,8 @@ async function LoadTherapists() {
 
         if (response.status >= 200 && response.status <= 299) {
             const result = await response.json().catch(() => null);
-            document.getElementById('CardTherapists').style.display = "flex";
-            const tbody = document.querySelector("#TherapistsTable tbody");
+
+            const tbody = document.querySelector("#ZonesTable tbody");
 
             tbody.innerHTML = "";
             result.forEach(c => {
@@ -49,21 +46,24 @@ async function LoadTherapists() {
                     Check = "checked";
                 }
 
-                tr.setAttribute("data-id", c.therapistId);
+                tr.setAttribute("data-id", c.id);
                 tr.innerHTML = `
                     <td>${c.name}</td>
+                    <td>${c.description}</td>
+                    <td>$${c.price}</td>
+                    <td>${c.duration}</td>
                     <td>
                         <div class="form-check form-switch">
-                            <input class="form-check-input" type="checkbox" role="switch" id="TherapistMode?${c.therapistId}" ${Check} disabled>
-                            <label class="form-check-label" for="TherapistMode?${c.therapistId}"></label>
+                            <input class="form-check-input" type="checkbox" role="switch" id="ZoneMode?${c.id}" ${Check} disabled>
+                            <label class="form-check-label" for="ZoneMode?${c.id}"></label>
                         </div>
                     </td>
                     <td> 
                         <div class="btn-group float-end" role="group" aria-label="Acciones">
-                            <button  onclick="DeleteTherapistModalOpen(${c.therapistId},'${c.name}')" class="btn btn-outline-danger">
+                            <button  onclick="DeleteZoneModalOpen(${c.id},'${c.name}')" class="btn btn-outline-danger">
                                 <i class="bi bi-trash"></i>
                             </button>
-                            <button onclick="UpdateTherapistModalOpen(${c.therapistId},'${c.name}',${c.enabled})" class="btn btn-outline-warning">
+                            <button onclick="UpdateZoneModalOpen(${c.id},'${c.name}','${c.description}',${c.enabled},${c.price},${c.duration})" class="btn btn-outline-warning">
                                 <i class="bi bi-pencil"></i>
                             </button>
                         </div>
@@ -90,19 +90,19 @@ async function LoadTherapists() {
         showToast("danger", error);
     }
 }
-function DeleteTherapistModalOpen(Id, Therapist) {
-    document.getElementById("LabelModalDeleteTherapist").innerText = Therapist;
-    sessionStorage.setItem('TherapistIdSelected', Id);
-    var DeleteTherapistModal = new bootstrap.Modal(document.getElementById("DeleteTherapistModal"));
-    DeleteTherapistModal.show();
+function DeleteZoneModalOpen(Id, Zone) {
+    document.getElementById("LabelModalDeleteZone").innerText = Zone;
+    sessionStorage.setItem('ZoneIdSelected', Id);
+    var DeleteZoneModal = new bootstrap.Modal(document.getElementById("DeleteZoneModal"));
+    DeleteZoneModal.show();
 }
-async function DeleteTherapist() {
+async function DeleteZone() {
     try {
-        var Id = sessionStorage.getItem('TherapistIdSelected');
+        var Id = sessionStorage.getItem('ZoneIdSelected');
         const data = {
-            TherapistId: Id
+            ZoneId: Id
         };
-        const response = await fetch("/Therapists/DeleteTherapist", {
+        const response = await fetch("/Zones/DeleteZone", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
@@ -113,8 +113,8 @@ async function DeleteTherapist() {
         if (response.status >= 200 && response.status <= 299) {
             const result = await response.text().catch(() => null);
             showToast("success", result);
-            const DeleteTherapistModal = document.getElementById('DeleteTherapistModal');
-            const modalInstance = bootstrap.Modal.getInstance(DeleteTherapistModal);
+            const DeleteZoneModal = document.getElementById('DeleteZoneModal');
+            const modalInstance = bootstrap.Modal.getInstance(DeleteZoneModal);
 
             if (!modalInstance) {
                 new bootstrap.Modal(modalElement).hide();
@@ -122,7 +122,7 @@ async function DeleteTherapist() {
                 modalInstance.hide();
             }
 
-            LoadTherapists();
+            LoadZones();
         }
 
         if (response.status == 400 && response.status <= 499) {
@@ -139,15 +139,26 @@ async function DeleteTherapist() {
         showToast("danger", error);
     }
 }
-async function AddTherapist() {
+function CreateZoneModalOpen() {
+    var CreateZoneModal = new bootstrap.Modal(document.getElementById("CreateZoneModal"));
+    CreateZoneModal.show();
+}
+async function AddZone() {
     try {
         const Name = document.getElementById("CreateModalName");
+        const Description = document.getElementById("CreateModalDescription");
         const Enabled = document.getElementById("CreateModalEnabled");
+        const Price = document.getElementById("CreateModalPrice");
+        const Duration = document.getElementById("CreateModalDuration");
+
         const data = {
             Name: Name.value,
-            Enabled: Enabled.checked
+            Description: Description.value,
+            Enabled: Enabled.checked,
+            Price: Price.value,
+            Duration: Duration.value
         };
-        const response = await fetch("/Therapists/AddTherapist", {
+        const response = await fetch("/Zones/AddZone", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
@@ -159,18 +170,21 @@ async function AddTherapist() {
             const result = await response.text().catch(() => null);
 
             document.getElementById("CreateModalName").value = "";
+            document.getElementById("CreateModalDescription").value = "";
             document.getElementById("CreateModalEnabled").checked = false;
+            document.getElementById("CreateModalPrice").value = "";
+            document.getElementById("CreateModalDuration").value = "";
 
             showToast("success", result);
-            const CreateTherapistModal = document.getElementById('CreateTherapistModal');
-            const modalInstance = bootstrap.Modal.getInstance(CreateTherapistModal);
+            const CreateZoneModal = document.getElementById('CreateZoneModal');
+            const modalInstance = bootstrap.Modal.getInstance(CreateZoneModal);
 
             if (!modalInstance) {
                 new bootstrap.Modal(modalElement).hide();
             } else {
                 modalInstance.hide();
             }
-            LoadTherapists();
+            LoadZones();
 
         }
 
@@ -188,17 +202,24 @@ async function AddTherapist() {
         showToast("danger", error);
     }
 }
-async function UpdateTherapist() {
+async function UpdateZone() {
     try {
-        const Id = sessionStorage.getItem('TherapistIdSelected');
+        const Id = sessionStorage.getItem('ZoneIdSelected');
         const Name = document.getElementById("UpdateModalName");
+        const Description = document.getElementById("UpdateModalDescription");
         const Enabled = document.getElementById("UpdateEnabled");
+        const Price = document.getElementById("UpdateModalPrice");
+        const Duration = document.getElementById("UpdateModalDuration");
+
         const data = {
             Id: Id,
             Name: Name.value,
+            Description: Description.value,
+            Price: Price.value,
+            Duration: Duration.value,
             Enabled: Enabled.checked
         };
-        const response = await fetch("/Therapists/UpdateTherapist", {
+        const response = await fetch("/Zones/UpdateZone", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
@@ -209,15 +230,15 @@ async function UpdateTherapist() {
         if (response.status >= 200 && response.status <= 299) {
             const result = await response.text().catch(() => null);
             showToast("success", result);
-            const UpdateTherapistModal = document.getElementById('UpdateTherapistModal');
-            const modalInstance = bootstrap.Modal.getInstance(UpdateTherapistModal);
+            const UpdateZoneModal = document.getElementById('UpdateZoneModal');
+            const modalInstance = bootstrap.Modal.getInstance(UpdateZoneModal);
 
             if (!modalInstance) {
                 new bootstrap.Modal(modalElement).hide();
             } else {
                 modalInstance.hide();
             }
-            LoadTherapists();
+            LoadZones();
 
         }
 
@@ -235,12 +256,15 @@ async function UpdateTherapist() {
         showToast("danger", error);
     }
 }
-function UpdateTherapistModalOpen(Id, Name, Enabled) {
+function UpdateZoneModalOpen(Id, Name, Description, Enabled,Price,Duration) {
 
-    sessionStorage.setItem('TherapistIdSelected', Id);
+    sessionStorage.setItem('ZoneIdSelected', Id);
     document.getElementById("UpdateModalName").value = Name;
     document.getElementById("UpdateEnabled").checked = Enabled;
+    document.getElementById("UpdateModalDescription").value = Description;
+    document.getElementById("UpdateModalPrice").value = Price;
+    document.getElementById("UpdateModalDuration").value = Duration;
 
-    var UpdateTherapistModal = new bootstrap.Modal(document.getElementById("UpdateTherapistModal"));
-    UpdateTherapistModal.show();
-} 
+    var UpdateZoneModal = new bootstrap.Modal(document.getElementById("UpdateZoneModal"));
+    UpdateZoneModal.show();
+}

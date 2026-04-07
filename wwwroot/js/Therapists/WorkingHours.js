@@ -1,12 +1,6 @@
 ﻿document.addEventListener("DOMContentLoaded", () => {
     setActiveMenu("TherapistsModule", "TherapistsModuleWorkingHours");
-    LoadBranches();
-
-    document.getElementById("branchesSelect").addEventListener("change", function () {
-        const select = document.getElementById("therapistsSelect");
-        select.disabled = false;
-        LoadTherapists();
-    });
+    LoadTherapists();
 
     document.getElementById("therapistsSelect").addEventListener("change", function () {
         const therapistId = this.value;
@@ -21,51 +15,9 @@
     }
 });
 
-async function LoadBranches() {
-    try {
-        const response = await fetch(`/Rooms/GetBranchesSelect`, {
-            method: "GET",
-            headers: {
-                "Content-Type": "application/json"
-            }
-        });
-
-        if (response.status >= 200 && response.status <= 299) {
-            const result = await response.json().catch(() => null);
-
-            const select = document.getElementById("branchesSelect");
-
-            select.innerHTML = '<option value="" selected disabled>Seleccione una sucursal...</option>';
-
-            if (result && result.length > 0) {
-                result.forEach(item => {
-                    const option = document.createElement("option");
-                    option.value = item.value;
-                    option.textContent = item.description;
-                    select.appendChild(option);
-                });
-            }
-        }
-
-
-        if (response.status >= 400 && response.status <= 499) {
-            const result = await response.text().catch(() => null);
-            showToast("warning", result);
-        }
-
-        if (response.status >= 500 && response.status <= 599) {
-            const result = await response.text().catch(() => null);
-            showToast("danger", result);
-        }
-
-    } catch (error) {
-        showToast("danger", error);
-    }
-}
 async function LoadTherapists() {
     try {
-        const Branch = document.getElementById('branchesSelect');
-        const response = await fetch(`/Therapists/GetTherapistsSelect?BranchId=` + Branch.value, {
+        const response = await fetch(`/Therapists/GetTherapistsSelect`, {
             method: "GET",
             headers: {
                 "Content-Type": "application/json"

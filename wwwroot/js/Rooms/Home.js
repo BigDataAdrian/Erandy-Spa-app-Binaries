@@ -1,10 +1,6 @@
 ﻿document.addEventListener("DOMContentLoaded", () => {
     setActiveMenu("RoomsModule", "RoomsModuleHome");
-
-    const input = document.getElementById('BranchesInput');
-    input.addEventListener('input', async () => {
-        await LoadBranches();
-    });
+    LoadRooms();
 
     const BtnCreateRoomModal = document.getElementById('BtnCreateRoomModal');
     BtnCreateRoomModal.addEventListener('click', async () => {
@@ -25,68 +21,11 @@
     BtnDeleteRoom.addEventListener('click', async () => {
         await DeleteRoom();
     });
-
-    const btnCleanBranch = document.getElementById('btnCleanBranch');
-    btnCleanBranch.addEventListener('click', async () => {
-        await Clean();
-    });
 });
-async function LoadBranches() {
-    const input = document.getElementById('BranchesInput');
-    const suggestions = document.getElementById('BranchesSuggestions');
-    const term = input.value.trim();
-    if (term.length < 2) {
-        suggestions.style.display = 'none';
-        return;
-    }
-
-    try {
-        const response = await fetch(`/Rooms/BranchesSearch?term=${encodeURIComponent(term)}`);
-        suggestions.style.display = 'block';
-        if (response.status >= 200 && response.status < 300) {
-            const data = await response.json();
-
-            suggestions.innerHTML = '';
-            if (data.length === 0) {
-                suggestions.style.display = 'none';
-                return;
-            }
-
-            data.forEach(item => {
-                const div = document.createElement('div');
-                div.className = 'list-group-item suggestion-item';
-                div.textContent = item.name;
-
-                div.addEventListener('click', () => {
-                    input.value = item.name;
-                    sessionStorage.setItem('BranchSelected', item.id);
-                    suggestions.innerHTML = '';
-                    suggestions.style.display = 'none';
-                    input.disabled = true;
-                    LoadRooms();
-                });
-
-                suggestions.appendChild(div);
-            });
-        }
-
-        if (response.status >= 400 && response.status < 500) {
-            const result = await response.text();
-            showToast("warning", result);
-        }
-
-        if (response.status >= 500) {
-            const result = await response.text();
-            showToast("danger", result);
-        }
-    } catch (error) {
-        showToast("danger", error);
-    }
-}
 async function LoadRooms() {
     try {
         var Branch = sessionStorage.getItem('BranchSelected');
-        const response = await fetch(`/Rooms/GetRooms?BranchId=` + Branch, {
+        const response = await fetch(`/Rooms/GetRooms`, {
             method: "GET",
             headers: {
                 "Content-Type": "application/json"
@@ -133,8 +72,6 @@ async function LoadRooms() {
                 tbody.appendChild(tr);
 
             });
-
-            document.getElementById("CardRooms").style.display = "flex";
         }
 
 
@@ -323,10 +260,4 @@ async function DeleteRoom() {
     } catch (error) {
         showToast("danger", error);
     }
-}
-function Clean() {
-    document.getElementById("CardRooms").style.display = "none";
-    document.querySelector("#RoomsTable tbody").innerHTML;
-    document.getElementById('BranchesInput').value = "";
-    document.getElementById('BranchesInput').disabled = false;
 }
