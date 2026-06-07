@@ -1,0 +1,26 @@
+﻿
+.card.maximized-card .table-container {
+    height: calc(100vh - 140px) !important;
+    max-height: 100% !important;
+}
+
+.table-no-wrap td, .table-no-wrap th {
+    white-space: nowrap;
+}
+
+.table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+}
+
+.table-container {
+    flex: 1;
+    overflow-y: auto;
+    height: calc(100vh - 490px);
+    transition: height 0.15s ease;
+}
+
+#CardAttendance {
+    display: none;
+}

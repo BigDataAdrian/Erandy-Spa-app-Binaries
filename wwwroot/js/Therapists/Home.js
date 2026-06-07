@@ -58,12 +58,13 @@ async function LoadTherapists() {
                             <label class="form-check-label" for="TherapistMode?${c.therapistId}"></label>
                         </div>
                     </td>
+                    <td>${c.identifier}</td>
                     <td> 
                         <div class="btn-group float-end" role="group" aria-label="Acciones">
                             <button  onclick="DeleteTherapistModalOpen(${c.therapistId},'${c.name}')" class="btn btn-outline-danger">
                                 <i class="bi bi-trash"></i>
                             </button>
-                            <button onclick="UpdateTherapistModalOpen(${c.therapistId},'${c.name}',${c.enabled})" class="btn btn-outline-warning">
+                            <button onclick="UpdateTherapistModalOpen(${c.therapistId},'${c.name}',${c.enabled},'${c.identifier}')" class="btn btn-outline-warning">
                                 <i class="bi bi-pencil"></i>
                             </button>
                         </div>
@@ -143,9 +144,11 @@ async function AddTherapist() {
     try {
         const Name = document.getElementById("CreateModalName");
         const Enabled = document.getElementById("CreateModalEnabled");
+        const Identifier = document.getElementById("CreateModalIdentifier");
         const data = {
             Name: Name.value,
-            Enabled: Enabled.checked
+            Enabled: Enabled.checked,
+            Identifier: Identifier.value
         };
         const response = await fetch("/Therapists/AddTherapist", {
             method: "POST",
@@ -193,10 +196,12 @@ async function UpdateTherapist() {
         const Id = sessionStorage.getItem('TherapistIdSelected');
         const Name = document.getElementById("UpdateModalName");
         const Enabled = document.getElementById("UpdateEnabled");
+        const Identifier = document.getElementById("UpdateModalIdentifier");
         const data = {
             Id: Id,
             Name: Name.value,
-            Enabled: Enabled.checked
+            Enabled: Enabled.checked,
+            Identifier: Identifier.value
         };
         const response = await fetch("/Therapists/UpdateTherapist", {
             method: "POST",
@@ -235,12 +240,12 @@ async function UpdateTherapist() {
         showToast("danger", error);
     }
 }
-function UpdateTherapistModalOpen(Id, Name, Enabled) {
+function UpdateTherapistModalOpen(Id, Name, Enabled, Identifier) {
 
     sessionStorage.setItem('TherapistIdSelected', Id);
     document.getElementById("UpdateModalName").value = Name;
     document.getElementById("UpdateEnabled").checked = Enabled;
-
+    document.getElementById("UpdateModalIdentifier").value = Identifier;
     var UpdateTherapistModal = new bootstrap.Modal(document.getElementById("UpdateTherapistModal"));
     UpdateTherapistModal.show();
 } 
