@@ -1,0 +1,29 @@
+﻿#CardData {
+    height: calc(100vh - 400px);
+    display: flex;
+    flex-direction: column;
+    display: none;
+}
+
+    #CardData .card-body {
+        flex: 1;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+    }
+
+.table-container {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: auto;
+    width: 100%;
+}
+
+.table-header thead th {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background-color: white;
+    white-space: nowrap;
+    border-bottom: 2px solid #dee2e6;
+}
