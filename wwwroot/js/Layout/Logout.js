@@ -1,25 +1,31 @@
-﻿document.addEventListener("DOMContentLoaded", () => {
-
-    const LogoutButton = document.getElementById("Logout");
-    LogoutButton.addEventListener("click", () => {
-        Logout();
-    });
+﻿document.getElementById('logout').addEventListener('click', function (event) {
+    event.preventDefault();
+    Logout();
 });
-async function Logout() {
-    try {
-        const response = await fetch("/Layout/Logout", {
-            method: "POST"
+
+function Logout() {
+    const spinner = document.getElementById("spinnerOverlay");
+    spinner.style.display = "flex";
+    var apiUrl = "/Login/Logout";
+    fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+    })
+        .then(response => {
+            if (!response.ok) {
+                return response.text().then((errorText) => {
+                    throw new Error(errorText);
+                });
+            }
+        })
+        .then(data => {
+            setTimeout(function () {
+                window.location.href = '/Login/index'
+            }, 1000);
+        })
+        .catch(error => {
+
         });
-
-        if (!response.ok) {
-            const error = await response.text();
-            throw new Error(error);
-        }
-
-        // Redirige al login después de cerrar sesión
-        const error = await response.text();
-        window.location.href = "/login";
-    } catch (error) {
-        showToast("danger", error);
-    }
 }

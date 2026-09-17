@@ -1,0 +1,103 @@
+#CardProtocolsSteps {
+    height: calc(100vh - 210px);
+    display: flex;
+    flex-direction: column;
+}
+
+#CardProtocolsSteps .card-body {
+    flex: 1;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.table-container {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: auto;
+    width: 100%;
+}
+
+.table-header thead th {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    background-color: white;
+    white-space: nowrap;
+    border-bottom: 2px solid #dee2e6;
+}
+
+.order-column {
+    width: 90px;
+    white-space: nowrap;
+}
+
+.drag-handle {
+    color: #6c757d;
+    cursor: grab;
+    margin-right: .45rem;
+}
+
+.dragging-row {
+    opacity: .45;
+}
+
+.drop-target {
+    border-top: 3px solid #0d6efd !important;
+}
+
+.instruction-cell {
+    min-width: 280px;
+    max-width: 520px;
+    white-space: normal;
+    line-height: 1.45;
+}
+
+#ProtocolsStepsProtocolsList {
+    max-height: 55vh;
+    overflow-y: auto;
+}
+
+.category-selector-group + .category-selector-group {
+    margin-top: .5rem;
+}
+
+.category-selector {
+    border-radius: .375rem;
+}
+
+.protocol-selector-list {
+    margin-left: 1rem;
+    border-left: 3px solid #dee2e6;
+}
+
+.protocol-selector-item {
+    border-left: 0;
+    padding-left: 1.25rem;
+}
+
+.instruction-textarea {
+    resize: vertical;
+    min-height: 160px;
+}
+
+.files-table-container {
+    max-height: 52vh;
+}
+
+.file-drop-zone {
+    border: 2px dashed #adb5bd;
+    border-radius: .5rem;
+    padding: 2.5rem 1rem;
+    text-align: center;
+    color: #6c757d;
+    cursor: pointer;
+    transition: border-color .15s ease-in-out, background-color .15s ease-in-out;
+}
+
+.file-drop-zone:hover,
+.file-drop-zone.drag-over {
+    border-color: #0d6efd;
+    background-color: #f0f6ff;
+    color: #0d6efd;
+}

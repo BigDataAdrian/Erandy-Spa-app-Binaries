@@ -1,0 +1,141 @@
+#CardProtocolsSearch:not(.maximized-card) {
+    height: calc(100vh - 210px) !important;
+}
+
+#CardProtocolsSearch.maximized-card {
+    height: 100% !important;
+    max-height: 100% !important;
+}
+
+#CardProtocolsSearch {
+    display: flex;
+    flex-direction: column;
+}
+
+#CardProtocolsSearch .card-body {
+    flex: 1;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.table-container {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: auto;
+    width: 100%;
+}
+
+.table-header thead th {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    background-color: white;
+    white-space: nowrap;
+    border-bottom: 2px solid #dee2e6;
+}
+
+.order-column {
+    width: 90px;
+    white-space: nowrap;
+}
+
+.instruction-cell {
+    min-width: 190px;
+    width: 190px;
+}
+
+#ProtocolsSearchProtocolsList {
+    max-height: 55vh;
+    overflow-y: auto;
+}
+
+.category-selector-group + .category-selector-group {
+    margin-top: .5rem;
+}
+
+.category-selector {
+    border-radius: .375rem;
+}
+
+.protocol-selector-list {
+    margin-left: 1rem;
+    border-left: 3px solid #dee2e6;
+}
+
+.protocol-selector-item {
+    border-left: 0;
+    padding-left: 1.25rem;
+}
+
+.instruction-content {
+    min-height: 100px;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    line-height: 1.55;
+}
+
+.images-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+    gap: 1rem;
+}
+
+.protocol-search-image-button {
+    display: flex;
+    flex-direction: column;
+    gap: .5rem;
+    padding: .5rem;
+    border: 1px solid #dee2e6;
+    border-radius: .5rem;
+    background: transparent;
+    text-align: left;
+    transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;
+}
+
+.protocol-search-image-button:hover,
+.protocol-search-image-button:focus-visible {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 .2rem rgba(13, 110, 253, .15);
+    outline: none;
+}
+
+.protocol-search-image-thumbnail {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+    border-radius: .35rem;
+    background-color: #f8f9fa;
+}
+
+.protocol-search-image-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    width: 100%;
+}
+
+.image-preview-body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 55vh;
+    padding: 1rem;
+    background-color: #f8f9fa;
+}
+
+.image-preview {
+    max-width: 100%;
+    max-height: 65vh;
+    object-fit: contain;
+}
+
+@media (max-width: 576px) {
+    #CardProtocolsSearch:not(.maximized-card) {
+        height: calc(100vh - 180px) !important;
+    }
+
+    .images-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
