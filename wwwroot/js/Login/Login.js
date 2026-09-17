@@ -1,6 +1,6 @@
 ﻿document.addEventListener("DOMContentLoaded", () => {
-    const loginButton = document.querySelector("#loginForm button");
-    loginButton.addEventListener("click", (e) => {
+    const loginForm = document.getElementById("loginForm");
+    loginForm.addEventListener("submit", (e) => {
         e.preventDefault();
         Login();
     });
