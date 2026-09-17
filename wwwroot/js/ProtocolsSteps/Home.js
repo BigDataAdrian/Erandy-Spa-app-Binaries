@@ -58,7 +58,8 @@ async function SelectProtocolsStepsProtocolModalOpen() {
 
 async function LoadProtocolsStepsProtocols() {
     const Container = document.getElementById("ProtocolsStepsProtocolsList");
-    Container.innerHTML = '<div class="text-center text-body-secondary"><span class="spinner-border spinner-border-sm" role="status"><span class="visually-hidden">Loading...</span></span></div>';
+    Container.innerHTML = '<div class="text-center"><div id="SpinnerProtocolsStepsProtocols" class="spinner-border text-primary" style="width: 18px; height: 18px; display: none; vertical-align: middle;" role="status"><span class="visually-hidden">Loading...</span></div></div>';
+    document.getElementById("SpinnerProtocolsStepsProtocols").style.display = "inline-flex";
     try {
         const [CategoriesResponse, ProtocolsResponse] = await Promise.all([
             fetch("/ProtocolsSteps/GetCategoriesSelect"),
@@ -122,7 +123,8 @@ function SelectProtocolsStepsProtocol(Id, CategoryName, ProtocolName) {
 async function LoadProtocolsSteps() {
     if (!SelectedProtocolId) return;
     const Tbody = document.querySelector("#ProtocolsStepsTable tbody");
-    Tbody.innerHTML = '<tr><td colspan="5" class="text-center text-body-secondary"><span class="spinner-border spinner-border-sm" role="status"><span class="visually-hidden">Loading...</span></span></td></tr>';
+    Tbody.innerHTML = '<tr><td colspan="5" class="text-center"><div id="SpinnerProtocolsStepsTable" class="spinner-border text-primary" style="width: 18px; height: 18px; display: none; vertical-align: middle;" role="status"><span class="visually-hidden">Loading...</span></div></td></tr>';
+    document.getElementById("SpinnerProtocolsStepsTable").style.display = "inline-flex";
     try {
         const Response = await fetch(`/ProtocolsSteps/GetProtocolsSteps?ProtocolId=${SelectedProtocolId}`);
         if (!Response.ok) throw new Error(await Response.text());
@@ -217,7 +219,7 @@ function CreateProtocolStepModalOpen() {
 
 async function AddProtocolStep() {
     try {
-        SetButtonLoading("BtnCreateProtocolStep", "Guardando...");
+        SetButtonLoading("BtnCreateProtocolStep");
         const Response = await fetch("/ProtocolsSteps/AddProtocolStep", {
             method: "POST", headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ ProtocolId: SelectedProtocolId, Name: document.getElementById("CreateProtocolStepModalName").value, Instruction: document.getElementById("CreateProtocolStepModalInstruction").value })
@@ -239,7 +241,7 @@ function UpdateProtocolStepModalOpen(Step) {
 
 async function UpdateProtocolStep() {
     try {
-        SetButtonLoading("BtnUpdateProtocolStep", "Actualizando...");
+        SetButtonLoading("BtnUpdateProtocolStep");
         const Response = await fetch("/ProtocolsSteps/UpdateProtocolStep", {
             method: "POST", headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ Id: SelectedStepId, Name: document.getElementById("UpdateProtocolStepModalName").value, Instruction: document.getElementById("UpdateProtocolStepModalInstruction").value })
@@ -260,7 +262,7 @@ function DeleteProtocolStepModalOpen(Id, Name) {
 
 async function DeleteProtocolStep() {
     try {
-        SetButtonLoading("BtnDeleteProtocolStep", "Eliminando...");
+        SetButtonLoading("BtnDeleteProtocolStep");
         const Response = await fetch(`/ProtocolsSteps/DeleteProtocolStep?StepId=${SelectedStepId}`, { method: "DELETE" });
         if (!Response.ok) throw new Error(await Response.text());
         showToast("success", await Response.text());
@@ -279,7 +281,8 @@ function OpenProtocolStepFiles(StepId, StepName) {
 
 async function LoadProtocolStepFiles() {
     const Tbody = document.querySelector("#ProtocolStepFilesTable tbody");
-    Tbody.innerHTML = '<tr><td colspan="3" class="text-center text-body-secondary"><span class="spinner-border spinner-border-sm" role="status"><span class="visually-hidden">Loading...</span></span></td></tr>';
+    Tbody.innerHTML = '<tr><td colspan="3" class="text-center"><div id="SpinnerProtocolStepFiles" class="spinner-border text-primary" style="width: 18px; height: 18px; display: none; vertical-align: middle;" role="status"><span class="visually-hidden">Loading...</span></div></td></tr>';
+    document.getElementById("SpinnerProtocolStepFiles").style.display = "inline-flex";
     try {
         const Response = await fetch(`/ProtocolsSteps/GetProtocolStepFiles?StepId=${SelectedStepId}`);
         if (!Response.ok) throw new Error(await Response.text());
@@ -347,7 +350,7 @@ function SetPendingFile(File) {
 async function AddProtocolStepFile() {
     if (!PendingFile) return;
     try {
-        SetButtonLoading("BtnSaveProtocolStepFile", "Cargando...");
+        SetButtonLoading("BtnSaveProtocolStepFile");
         const Form = new FormData();
         Form.append("StepId", SelectedStepId);
         Form.append("File", PendingFile);
@@ -369,7 +372,7 @@ function DeleteProtocolStepFileModalOpen(Id, Name) {
 
 async function DeleteProtocolStepFile() {
     try {
-        SetButtonLoading("BtnDeleteProtocolStepFile", "Eliminando...");
+        SetButtonLoading("BtnDeleteProtocolStepFile");
         const Response = await fetch(`/ProtocolsSteps/DeleteProtocolStepFile?FileId=${SelectedStepFileId}`, { method: "DELETE" });
         if (!Response.ok) throw new Error(await Response.text());
         showToast("success", await Response.text());
@@ -408,21 +411,26 @@ function SwitchModal(FromId, ToId, Callback) {
     }
 }
 
-function SetButtonLoading(ButtonId, LoadingTitle) {
+function SetButtonLoading(ButtonId) {
     const Button = document.getElementById(ButtonId);
     if (!Button) return;
     const Icon = Button.querySelector("i");
-    if (Icon) { Button.dataset.originalIcon = Icon.className; Icon.className = "spinner-border spinner-border-sm"; }
+    const Spinner = Button.querySelector(".button-spinner");
+    if (Icon) Icon.style.display = "none";
+    if (Spinner) Spinner.style.display = "inline-flex";
     Button.dataset.originalTitle = Button.getAttribute("data-bs-title") || "";
+    Button.setAttribute("aria-busy", "true");
     Button.disabled = true;
-    Button.setAttribute("data-bs-title", LoadingTitle);
 }
 
 function ClearButtonLoading(ButtonId) {
     const Button = document.getElementById(ButtonId);
     if (!Button) return;
     const Icon = Button.querySelector("i");
-    if (Icon && Button.dataset.originalIcon) Icon.className = Button.dataset.originalIcon;
+    const Spinner = Button.querySelector(".button-spinner");
+    if (Icon) Icon.style.display = "";
+    if (Spinner) Spinner.style.display = "none";
+    Button.removeAttribute("aria-busy");
     Button.disabled = false;
     Button.setAttribute("data-bs-title", Button.dataset.originalTitle || "");
 }

@@ -1,4 +1,4 @@
-document.addEventListener("DOMContentLoaded", () => {
+﻿document.addEventListener("DOMContentLoaded", () => {
     setActiveMenu("ProtocolsCategoriesModule", "ProtocolsCategoriesModuleHome");
     LoadProtocolsCategories();
     InitTooltips();
@@ -25,6 +25,10 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 async function LoadProtocolsCategories() {
+    const Tbody = document.querySelector("#ProtocolsCategoriesTable tbody");
+    Tbody.innerHTML = '<tr><td colspan="4" class="text-center"><div id="SpinnerProtocolsCategoriesTable" class="spinner-border text-primary" style="width: 18px; height: 18px; display: none; vertical-align: middle;" role="status"><span class="visually-hidden">Loading...</span></div></td></tr>';
+    document.getElementById("SpinnerProtocolsCategoriesTable").style.display = "inline-flex";
+
     try {
         const response = await fetch(`/ProtocolsCategories/GetProtocolsCategories`, {
             method: "GET",
@@ -104,26 +108,18 @@ function InitTooltips() {
     });
 }
 
-function SetButtonLoading(ButtonId, LoadingTitle) {
+function SetButtonLoading(ButtonId) {
     const Button = document.getElementById(ButtonId);
     if (!Button) return;
 
     const Icon = Button.querySelector('i');
-    if (Icon) {
-        Button.setAttribute('data-original-icon', Icon.className);
-        Icon.className = 'spinner-border spinner-border-sm';
-        Icon.setAttribute('role', 'status');
-        Icon.setAttribute('aria-hidden', 'true');
-    }
+    const Spinner = Button.querySelector('.button-spinner');
+    if (Icon) Icon.style.display = 'none';
+    if (Spinner) Spinner.style.display = 'inline-flex';
 
     Button.setAttribute('data-original-title', Button.getAttribute('data-bs-title') || '');
+    Button.setAttribute('aria-busy', 'true');
     Button.disabled = true;
-
-    const Tooltip = bootstrap.Tooltip.getInstance(Button);
-    if (Tooltip) {
-        Tooltip.setContent({ '.tooltip-inner': LoadingTitle });
-    }
-    Button.setAttribute('data-bs-title', LoadingTitle);
 }
 
 function ClearButtonLoading(ButtonId) {
@@ -131,14 +127,12 @@ function ClearButtonLoading(ButtonId) {
     if (!Button) return;
 
     const Icon = Button.querySelector('i');
-    const OriginalIcon = Button.getAttribute('data-original-icon');
-    if (Icon && OriginalIcon) {
-        Icon.className = OriginalIcon;
-        Icon.removeAttribute('role');
-        Icon.removeAttribute('aria-hidden');
-    }
+    const Spinner = Button.querySelector('.button-spinner');
+    if (Icon) Icon.style.display = '';
+    if (Spinner) Spinner.style.display = 'none';
 
     const OriginalTitle = Button.getAttribute('data-original-title') || '';
+    Button.removeAttribute('aria-busy');
     Button.disabled = false;
 
     const Tooltip = bootstrap.Tooltip.getInstance(Button);
@@ -164,7 +158,7 @@ function CreateProtocolsCategoryModalOpen() {
 
 async function AddProtocolsCategory() {
     try {
-        SetButtonLoading('BtnCreateProtocolsCategory', 'Guardando...');
+        SetButtonLoading('BtnCreateProtocolsCategory');
 
         const Name = document.getElementById("CreateModalName");
         const Description = document.getElementById("CreateModalDescription");
@@ -222,7 +216,7 @@ function UpdateProtocolsCategoryModalOpen(Id, Name, Description, Enabled) {
 
 async function UpdateProtocolsCategory() {
     try {
-        SetButtonLoading('BtnUpdateProtocolsCategory', 'Actualizando...');
+        SetButtonLoading('BtnUpdateProtocolsCategory');
 
         const Id = sessionStorage.getItem('ProtocolsCategoryIdSelected');
         const Name = document.getElementById("UpdateModalName");
@@ -276,7 +270,7 @@ function DeleteProtocolsCategoryModalOpen(Id, ProtocolsCategoryLabel) {
 
 async function DeleteProtocolsCategory() {
     try {
-        SetButtonLoading('BtnDeleteProtocolsCategory', 'Eliminando...');
+        SetButtonLoading('BtnDeleteProtocolsCategory');
 
         const Id = sessionStorage.getItem('ProtocolsCategoryIdSelected');
         const response = await fetch(`/ProtocolsCategories/DeleteProtocolsCategory?ProtocolsCategoryId=${Id}`, {

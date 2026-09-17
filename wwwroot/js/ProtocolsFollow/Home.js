@@ -35,7 +35,8 @@ async function SelectProtocolsFollowProtocolModalOpen() {
 
 async function LoadProtocolsFollowProtocols() {
     const Container = document.getElementById("ProtocolsFollowProtocolsList");
-    Container.innerHTML = '<div class="text-center text-body-secondary"><span class="spinner-border spinner-border-sm" role="status"><span class="visually-hidden">Loading...</span></span></div>';
+    Container.innerHTML = '<div class="text-center"><div id="SpinnerProtocolsFollowProtocols" class="spinner-border text-primary" style="width: 18px; height: 18px; display: none; vertical-align: middle;" role="status"><span class="visually-hidden">Loading...</span></div></div>';
+    document.getElementById("SpinnerProtocolsFollowProtocols").style.display = "inline-flex";
     try {
         const [CategoriesResponse, ProtocolsResponse] = await Promise.all([
             fetch("/ProtocolsFollow/GetCategoriesSelect"),
@@ -180,7 +181,7 @@ function RenderProtocolsFollowStep() {
             </div>
             <div class="protocols-follow-step-instruction"></div>
             <div id="ProtocolsFollowImageCarousel" class="protocols-follow-image-carousel">
-                <div class="text-body-secondary"><span class="spinner-border spinner-border-sm" role="status"><span class="visually-hidden">Loading...</span></span></div>
+                <div id="SpinnerProtocolsFollowImages" class="spinner-border text-primary" style="width: 18px; height: 18px; display: none; vertical-align: middle;" role="status"><span class="visually-hidden">Loading...</span></div>
             </div>
         </div>
         <div class="protocols-follow-step-navigation">
@@ -198,6 +199,7 @@ function RenderProtocolsFollowStep() {
 async function LoadProtocolsFollowStepImages(StepId) {
     const RequestId = ++StepImagesRequestId;
     const Container = document.getElementById("ProtocolsFollowImageCarousel");
+    document.getElementById("SpinnerProtocolsFollowImages").style.display = "inline-flex";
     try {
         const Response = await fetch(`/ProtocolsFollow/GetProtocolStepImages?StepId=${StepId}`);
         if (!Response.ok) throw new Error(await Response.text());
@@ -265,16 +267,19 @@ function ShowProtocolsFollowLoading() {
     document.getElementById("ProtocolsFollowEmptyState").classList.add("d-none");
     document.getElementById("ProtocolsFollowViewer").classList.add("d-none");
     document.getElementById("ProtocolsFollowLoadingState").classList.remove("d-none");
+    document.getElementById("SpinnerProtocolsFollow").style.display = "inline-flex";
 }
 
 function ShowProtocolsFollowViewer() {
     document.getElementById("ProtocolsFollowEmptyState").classList.add("d-none");
     document.getElementById("ProtocolsFollowLoadingState").classList.add("d-none");
+    document.getElementById("SpinnerProtocolsFollow").style.display = "none";
     document.getElementById("ProtocolsFollowViewer").classList.remove("d-none");
 }
 
 function ShowProtocolsFollowEmpty(Message) {
     document.getElementById("ProtocolsFollowLoadingState").classList.add("d-none");
+    document.getElementById("SpinnerProtocolsFollow").style.display = "none";
     document.getElementById("ProtocolsFollowViewer").classList.add("d-none");
     const EmptyState = document.getElementById("ProtocolsFollowEmptyState");
     EmptyState.classList.remove("d-none");

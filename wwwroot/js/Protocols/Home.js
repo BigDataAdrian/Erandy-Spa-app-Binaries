@@ -1,4 +1,4 @@
-document.addEventListener("DOMContentLoaded", () => {
+﻿document.addEventListener("DOMContentLoaded", () => {
     setActiveMenu("ProtocolsModule", "ProtocolsModuleHome");
     InitTooltips();
 
@@ -43,6 +43,10 @@ async function SelectProtocolsCategoryModalOpen() {
 }
 
 async function LoadProtocolsCategories() {
+    const CategoriesList = document.getElementById("ProtocolsCategoriesList");
+    CategoriesList.innerHTML = `<div class="text-center"><div id="SpinnerProtocolsCategories" class="spinner-border text-primary" style="width: 18px; height: 18px; display: none; vertical-align: middle;" role="status"><span class="visually-hidden">Loading...</span></div></div>`;
+    document.getElementById("SpinnerProtocolsCategories").style.display = "inline-flex";
+
     try {
         const response = await fetch(`/Protocols/GetCategoriesSelect`, {
             method: "GET",
@@ -112,6 +116,10 @@ async function LoadProtocols() {
             return;
         }
 
+        const tbody = document.querySelector("#ProtocolsTable tbody");
+        tbody.innerHTML = '<tr><td colspan="6" class="text-center"><div id="SpinnerProtocolsTable" class="spinner-border text-primary" style="width: 18px; height: 18px; display: none; vertical-align: middle;" role="status"><span class="visually-hidden">Loading...</span></div></td></tr>';
+        document.getElementById("SpinnerProtocolsTable").style.display = "inline-flex";
+
         const response = await fetch(`/Protocols/GetProtocols?CategoryId=${CategoryId}`, {
             method: "GET",
             headers: {
@@ -121,7 +129,6 @@ async function LoadProtocols() {
 
         if (response.status >= 200 && response.status <= 299) {
             const result = await response.json().catch(() => null);
-            const tbody = document.querySelector("#ProtocolsTable tbody");
             tbody.innerHTML = "";
 
             if (result && result.length > 0) {
@@ -200,26 +207,18 @@ function InitTooltips() {
     });
 }
 
-function SetButtonLoading(ButtonId, LoadingTitle) {
+function SetButtonLoading(ButtonId) {
     const Button = document.getElementById(ButtonId);
     if (!Button) return;
 
     const Icon = Button.querySelector('i');
-    if (Icon) {
-        Button.setAttribute('data-original-icon', Icon.className);
-        Icon.className = 'spinner-border spinner-border-sm';
-        Icon.setAttribute('role', 'status');
-        Icon.setAttribute('aria-hidden', 'true');
-    }
+    const Spinner = Button.querySelector('.button-spinner');
+    if (Icon) Icon.style.display = 'none';
+    if (Spinner) Spinner.style.display = 'inline-flex';
 
     Button.setAttribute('data-original-title', Button.getAttribute('data-bs-title') || '');
+    Button.setAttribute('aria-busy', 'true');
     Button.disabled = true;
-
-    const Tooltip = bootstrap.Tooltip.getInstance(Button);
-    if (Tooltip) {
-        Tooltip.setContent({ '.tooltip-inner': LoadingTitle });
-    }
-    Button.setAttribute('data-bs-title', LoadingTitle);
 }
 
 function ClearButtonLoading(ButtonId) {
@@ -227,14 +226,12 @@ function ClearButtonLoading(ButtonId) {
     if (!Button) return;
 
     const Icon = Button.querySelector('i');
-    const OriginalIcon = Button.getAttribute('data-original-icon');
-    if (Icon && OriginalIcon) {
-        Icon.className = OriginalIcon;
-        Icon.removeAttribute('role');
-        Icon.removeAttribute('aria-hidden');
-    }
+    const Spinner = Button.querySelector('.button-spinner');
+    if (Icon) Icon.style.display = '';
+    if (Spinner) Spinner.style.display = 'none';
 
     const OriginalTitle = Button.getAttribute('data-original-title') || '';
+    Button.removeAttribute('aria-busy');
     Button.disabled = false;
 
     const Tooltip = bootstrap.Tooltip.getInstance(Button);
@@ -278,7 +275,7 @@ function CreateProtocolModalOpen() {
 
 async function AddProtocol() {
     try {
-        SetButtonLoading('BtnCreateProtocol', 'Guardando...');
+        SetButtonLoading('BtnCreateProtocol');
 
         const CategoryId = sessionStorage.getItem('ProtocolCategoryIdSelected');
         const Name = document.getElementById("CreateModalName");
@@ -346,7 +343,7 @@ function UpdateProtocolModalOpen(Id, Name, Description, Indications, Warnings, E
 
 async function UpdateProtocol() {
     try {
-        SetButtonLoading('BtnUpdateProtocol', 'Actualizando...');
+        SetButtonLoading('BtnUpdateProtocol');
 
         const Id = sessionStorage.getItem('ProtocolIdSelected');
         const Name = document.getElementById("UpdateModalName");
@@ -404,7 +401,7 @@ function DeleteProtocolModalOpen(Id, ProtocolLabel) {
 
 async function DeleteProtocol() {
     try {
-        SetButtonLoading('BtnDeleteProtocol', 'Eliminando...');
+        SetButtonLoading('BtnDeleteProtocol');
 
         const Id = sessionStorage.getItem('ProtocolIdSelected');
         const response = await fetch(`/Protocols/DeleteProtocol?ProtocolId=${Id}`, {

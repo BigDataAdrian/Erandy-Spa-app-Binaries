@@ -32,7 +32,8 @@ async function SelectProtocolsSearchProtocolModalOpen() {
 
 async function LoadProtocolsSearchProtocols() {
     const Container = document.getElementById("ProtocolsSearchProtocolsList");
-    Container.innerHTML = '<div class="text-center text-body-secondary"><span class="spinner-border spinner-border-sm" role="status"><span class="visually-hidden">Loading...</span></span></div>';
+    Container.innerHTML = '<div class="text-center"><div id="SpinnerProtocolsSearchProtocols" class="spinner-border text-primary" style="width: 18px; height: 18px; display: none; vertical-align: middle;" role="status"><span class="visually-hidden">Loading...</span></div></div>';
+    document.getElementById("SpinnerProtocolsSearchProtocols").style.display = "inline-flex";
     try {
         const [CategoriesResponse, ProtocolsResponse] = await Promise.all([
             fetch("/ProtocolsSearch/GetCategoriesSelect"),
@@ -98,7 +99,8 @@ function SelectProtocolsSearchProtocol(Id, CategoryName, ProtocolName, Indicatio
 async function LoadProtocolsSteps() {
     if (!SelectedProtocolId) return;
     const Tbody = document.querySelector("#ProtocolsSearchTable tbody");
-    Tbody.innerHTML = '<tr><td colspan="4" class="text-center text-body-secondary"><span class="spinner-border spinner-border-sm" role="status"><span class="visually-hidden">Loading...</span></span></td></tr>';
+    Tbody.innerHTML = '<tr><td colspan="4" class="text-center"><div id="SpinnerProtocolsSearchTable" class="spinner-border text-primary" style="width: 18px; height: 18px; display: none; vertical-align: middle;" role="status"><span class="visually-hidden">Loading...</span></div></td></tr>';
+    document.getElementById("SpinnerProtocolsSearchTable").style.display = "inline-flex";
     try {
         const Response = await fetch(`/ProtocolsSearch/GetProtocolsSteps?ProtocolId=${SelectedProtocolId}`);
         if (!Response.ok) throw new Error(await Response.text());
@@ -151,7 +153,8 @@ function OpenProtocolSearchImages(StepId, StepName) {
 
 async function LoadProtocolSearchImages() {
     const Container = document.getElementById("ProtocolsSearchImagesGrid");
-    Container.innerHTML = '<div class="text-center text-body-secondary"><span class="spinner-border spinner-border-sm" role="status"><span class="visually-hidden">Loading...</span></span></div>';
+    Container.innerHTML = '<div class="text-center"><div id="SpinnerProtocolsSearchImages" class="spinner-border text-primary" style="width: 18px; height: 18px; display: none; vertical-align: middle;" role="status"><span class="visually-hidden">Loading...</span></div></div>';
+    document.getElementById("SpinnerProtocolsSearchImages").style.display = "inline-flex";
     try {
         const Response = await fetch(`/ProtocolsSearch/GetProtocolStepImages?StepId=${SelectedStepId}`);
         if (!Response.ok) throw new Error(await Response.text());
