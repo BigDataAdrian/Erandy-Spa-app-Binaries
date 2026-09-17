@@ -1,5 +1,7 @@
 let SelectedProtocolId = null;
 let SelectedStepId = null;
+let SelectedProtocolIndications = "";
+let SelectedProtocolWarnings = "";
 
 document.addEventListener("DOMContentLoaded", () => {
     setActiveMenu("ProtocolsSearchModule", "ProtocolsSearchModuleHome");
@@ -8,12 +10,17 @@ document.addEventListener("DOMContentLoaded", () => {
     const ProtocolId = sessionStorage.getItem("ProtocolsSearchProtocolIdSelected");
     const ProtocolName = sessionStorage.getItem("ProtocolsSearchProtocolNameSelected");
     const CategoryName = sessionStorage.getItem("ProtocolsSearchCategoryNameSelected");
+    const Indications = sessionStorage.getItem("ProtocolsSearchProtocolIndicationsSelected") || "";
+    const Warnings = sessionStorage.getItem("ProtocolsSearchProtocolWarningsSelected") || "";
+    SetProtocolsSearchInformation(Indications, Warnings);
     if (ProtocolId && ProtocolName) {
         SelectedProtocolId = parseInt(ProtocolId);
         document.getElementById("ProtocolsSearchProtocolLabel").innerText = CategoryName ? `${CategoryName} / ${ProtocolName}` : ProtocolName;
         LoadProtocolsSteps();
     }
 
+    document.getElementById("BtnProtocolsSearchIndications").addEventListener("click", () => OpenProtocolsSearchTextModal(SelectedProtocolIndications, "Indicaciones"));
+    document.getElementById("BtnProtocolsSearchWarnings").addEventListener("click", () => OpenProtocolsSearchTextModal(SelectedProtocolWarnings, "Advertencias"));
     document.getElementById("BtnSelectProtocolsSearchProtocolModal").addEventListener("click", SelectProtocolsSearchProtocolModalOpen);
     document.getElementById("BtnBackToProtocolsSearchImages").addEventListener("click", ShowProtocolsSearchImagesGallery);
 });
@@ -62,7 +69,7 @@ async function LoadProtocolsSearchProtocols() {
                     Button.type = "button";
                     Button.className = "list-group-item list-group-item-action protocol-selector-item d-flex justify-content-between align-items-center";
                     Button.innerHTML = `<span><i class="bi bi-file-earmark-text me-2"></i>${EscapeHtml(Protocol.name)}</span><i class="bi bi-chevron-right"></i>`;
-                    Button.addEventListener("click", () => SelectProtocolsSearchProtocol(Protocol.id, Category.name, Protocol.name));
+                    Button.addEventListener("click", () => SelectProtocolsSearchProtocol(Protocol.id, Category.name, Protocol.name, Protocol.indications, Protocol.warnings));
                     ProtocolList.appendChild(Button);
                 });
             }
@@ -75,11 +82,14 @@ async function LoadProtocolsSearchProtocols() {
     }
 }
 
-function SelectProtocolsSearchProtocol(Id, CategoryName, ProtocolName) {
+function SelectProtocolsSearchProtocol(Id, CategoryName, ProtocolName, Indications, Warnings) {
     SelectedProtocolId = Id;
     sessionStorage.setItem("ProtocolsSearchProtocolIdSelected", Id);
     sessionStorage.setItem("ProtocolsSearchProtocolNameSelected", ProtocolName);
     sessionStorage.setItem("ProtocolsSearchCategoryNameSelected", CategoryName);
+    sessionStorage.setItem("ProtocolsSearchProtocolIndicationsSelected", Indications || "");
+    sessionStorage.setItem("ProtocolsSearchProtocolWarningsSelected", Warnings || "");
+    SetProtocolsSearchInformation(Indications, Warnings);
     document.getElementById("ProtocolsSearchProtocolLabel").innerText = `${CategoryName} / ${ProtocolName}`;
     HideModal("SelectProtocolsSearchProtocolModal");
     LoadProtocolsSteps();
@@ -195,6 +205,19 @@ function ShowProtocolsSearchImagesGallery() {
     document.getElementById("ProtocolsSearchImagesGalleryView").classList.remove("d-none");
     document.getElementById("BtnBackToProtocolsSearchImages").classList.add("d-none");
     document.getElementById("ProtocolsSearchImagesModalLabel").innerText = "Imágenes del paso";
+}
+
+function SetProtocolsSearchInformation(Indications, Warnings) {
+    SelectedProtocolIndications = Indications || "";
+    SelectedProtocolWarnings = Warnings || "";
+    document.getElementById("BtnProtocolsSearchIndications").disabled = SelectedProtocolIndications.trim().length === 0;
+    document.getElementById("BtnProtocolsSearchWarnings").disabled = SelectedProtocolWarnings.trim().length === 0;
+}
+
+function OpenProtocolsSearchTextModal(Text, Title) {
+    document.getElementById("ProtocolsSearchTextModalLabel").innerText = Title;
+    document.getElementById("ProtocolsSearchTextModalBody").value = Text || "";
+    ShowModal("ProtocolsSearchTextModal");
 }
 
 function ShowModal(Id) {

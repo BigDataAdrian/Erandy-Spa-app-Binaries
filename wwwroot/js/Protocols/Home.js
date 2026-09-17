@@ -130,13 +130,19 @@ async function LoadProtocols() {
                     const CheckEnabled = c.enabled ? "checked" : "";
                     const Name = EscapeHtml(c.name);
                     const Description = EscapeHtml(c.description);
-                    const EncodedName = encodeURIComponent(c.name ?? "");
-                    const EncodedDescription = encodeURIComponent(c.description ?? "");
+                    const EncodedName = EncodeForHandler(c.name);
+                    const EncodedDescription = EncodeForHandler(c.description);
+                    const EncodedIndications = EncodeForHandler(c.indications);
+                    const EncodedWarnings = EncodeForHandler(c.warnings);
+                    const IndicationsButton = c.indications ? `<button onclick="ShowProtocolTextModal(decodeURIComponent('${EncodedIndications}'), 'Indicaciones')" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Consultar indicaciones" class="btn btn-outline-info"><i class="bi bi-clipboard2-check"></i></button>` : "";
+                    const WarningsButton = c.warnings ? `<button onclick="ShowProtocolTextModal(decodeURIComponent('${EncodedWarnings}'), 'Advertencias')" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Consultar advertencias" class="btn btn-outline-warning"><i class="bi bi-exclamation-triangle"></i></button>` : "";
 
                     tr.setAttribute("data-id", c.id);
                     tr.innerHTML = `
                         <td>${Name}</td>
                         <td>${Description}</td>
+                        <td>${IndicationsButton}</td>
+                        <td>${WarningsButton}</td>
                         <td>
                             <div class="form-check form-switch">
                                 <input class="form-check-input" type="checkbox" role="switch" id="ProtocolMode?${c.id}" ${CheckEnabled} disabled>
@@ -148,7 +154,7 @@ async function LoadProtocols() {
                                 <button onclick="DeleteProtocolModalOpen(${c.id}, decodeURIComponent('${EncodedName}'))" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Eliminar protocolo" class="btn btn-outline-danger">
                                     <i class="bi bi-trash"></i>
                                 </button>
-                                <button onclick="UpdateProtocolModalOpen(${c.id}, decodeURIComponent('${EncodedName}'), decodeURIComponent('${EncodedDescription}'), ${c.enabled})" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Editar protocolo" class="btn btn-outline-warning">
+                                <button onclick="UpdateProtocolModalOpen(${c.id}, decodeURIComponent('${EncodedName}'), decodeURIComponent('${EncodedDescription}'), decodeURIComponent('${EncodedIndications}'), decodeURIComponent('${EncodedWarnings}'), ${c.enabled})" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Editar protocolo" class="btn btn-outline-warning">
                                     <i class="bi bi-pencil"></i>
                                 </button>
                             </div>
@@ -157,7 +163,7 @@ async function LoadProtocols() {
                     tbody.appendChild(tr);
                 });
             } else {
-                tbody.innerHTML = '<tr><td colspan="4" class="text-center text-body-secondary">No hay protocolos en esta categoría.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="6" class="text-center text-body-secondary">No hay protocolos en esta categoría.</td></tr>';
             }
 
             document.getElementById("ProtocolsCount").innerText = result ? result.length : 0;
@@ -247,6 +253,18 @@ function EscapeHtml(Value) {
         .replaceAll("'", "&#039;");
 }
 
+function EncodeForHandler(Value) {
+    return encodeURIComponent(String(Value ?? "")).replaceAll("'", "%27");
+}
+
+function ShowProtocolTextModal(Text, Title) {
+    document.getElementById("ProtocolTextViewModalLabel").innerText = Title;
+    document.getElementById("ProtocolTextViewModalBody").value = Text ?? "";
+
+    const ProtocolTextViewModal = new bootstrap.Modal(document.getElementById("ProtocolTextViewModal"));
+    ProtocolTextViewModal.show();
+}
+
 function CreateProtocolModalOpen() {
     const CategoryId = sessionStorage.getItem('ProtocolCategoryIdSelected');
     if (!CategoryId) {
@@ -265,10 +283,14 @@ async function AddProtocol() {
         const CategoryId = sessionStorage.getItem('ProtocolCategoryIdSelected');
         const Name = document.getElementById("CreateModalName");
         const Description = document.getElementById("CreateModalDescription");
+        const Indications = document.getElementById("CreateModalIndications");
+        const Warnings = document.getElementById("CreateModalWarnings");
         const Enabled = document.getElementById("CreateModalEnabled");
         const data = {
             Name: Name.value,
             Description: Description.value,
+            Indications: Indications.value,
+            Warnings: Warnings.value,
             Enabled: Enabled.checked,
             CategoryId: parseInt(CategoryId)
         };
@@ -283,6 +305,8 @@ async function AddProtocol() {
             const result = await response.text().catch(() => null);
             Name.value = "";
             Description.value = "";
+            Indications.value = "";
+            Warnings.value = "";
             Enabled.checked = false;
             showToast("success", result);
 
@@ -308,10 +332,12 @@ async function AddProtocol() {
     }
 }
 
-function UpdateProtocolModalOpen(Id, Name, Description, Enabled) {
+function UpdateProtocolModalOpen(Id, Name, Description, Indications, Warnings, Enabled) {
     sessionStorage.setItem('ProtocolIdSelected', Id);
     document.getElementById("UpdateModalName").value = Name;
     document.getElementById("UpdateModalDescription").value = Description;
+    document.getElementById("UpdateModalIndications").value = Indications;
+    document.getElementById("UpdateModalWarnings").value = Warnings;
     document.getElementById("UpdateModalEnabled").checked = Enabled;
 
     const UpdateProtocolModal = new bootstrap.Modal(document.getElementById("UpdateProtocolModal"));
@@ -325,11 +351,15 @@ async function UpdateProtocol() {
         const Id = sessionStorage.getItem('ProtocolIdSelected');
         const Name = document.getElementById("UpdateModalName");
         const Description = document.getElementById("UpdateModalDescription");
+        const Indications = document.getElementById("UpdateModalIndications");
+        const Warnings = document.getElementById("UpdateModalWarnings");
         const Enabled = document.getElementById("UpdateModalEnabled");
         const data = {
             Id: parseInt(Id),
             Name: Name.value,
             Description: Description.value,
+            Indications: Indications.value,
+            Warnings: Warnings.value,
             Enabled: Enabled.checked
         };
 

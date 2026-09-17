@@ -1,4 +1,6 @@
 let SelectedProtocolId = null;
+let SelectedProtocolIndications = "";
+let SelectedProtocolWarnings = "";
 let ProtocolFollowSteps = [];
 let CurrentStepIndex = 0;
 let StepImagesRequestId = 0;
@@ -13,11 +15,17 @@ document.addEventListener("DOMContentLoaded", () => {
     const ProtocolId = sessionStorage.getItem("ProtocolsFollowProtocolIdSelected");
     const ProtocolName = sessionStorage.getItem("ProtocolsFollowProtocolNameSelected");
     const CategoryName = sessionStorage.getItem("ProtocolsFollowCategoryNameSelected");
+    const Indications = sessionStorage.getItem("ProtocolsFollowProtocolIndicationsSelected") || "";
+    const Warnings = sessionStorage.getItem("ProtocolsFollowProtocolWarningsSelected") || "";
+    SetProtocolsFollowInformation(Indications, Warnings);
     if (ProtocolId && ProtocolName) {
         SelectedProtocolId = parseInt(ProtocolId);
         SetProtocolsFollowTitle(CategoryName, ProtocolName);
         LoadProtocolsFollowSteps();
     }
+
+    document.getElementById("BtnProtocolsFollowIndications").addEventListener("click", () => OpenProtocolsFollowTextModal(SelectedProtocolIndications, "Indicaciones"));
+    document.getElementById("BtnProtocolsFollowWarnings").addEventListener("click", () => OpenProtocolsFollowTextModal(SelectedProtocolWarnings, "Advertencias"));
 });
 
 async function SelectProtocolsFollowProtocolModalOpen() {
@@ -65,7 +73,7 @@ async function LoadProtocolsFollowProtocols() {
                     Button.type = "button";
                     Button.className = "list-group-item list-group-item-action protocol-selector-item d-flex justify-content-between align-items-center";
                     Button.innerHTML = `<span><i class="bi bi-file-earmark-text me-2"></i>${EscapeHtml(Protocol.name)}</span><i class="bi bi-chevron-right"></i>`;
-                    Button.addEventListener("click", () => SelectProtocolsFollowProtocol(Protocol.id, Category.name, Protocol.name));
+                    Button.addEventListener("click", () => SelectProtocolsFollowProtocol(Protocol.id, Category.name, Protocol.name, Protocol.indications, Protocol.warnings));
                     ProtocolList.appendChild(Button);
                 });
             }
@@ -78,11 +86,14 @@ async function LoadProtocolsFollowProtocols() {
     }
 }
 
-function SelectProtocolsFollowProtocol(Id, CategoryName, ProtocolName) {
+function SelectProtocolsFollowProtocol(Id, CategoryName, ProtocolName, Indications, Warnings) {
     SelectedProtocolId = Id;
     sessionStorage.setItem("ProtocolsFollowProtocolIdSelected", Id);
     sessionStorage.setItem("ProtocolsFollowProtocolNameSelected", ProtocolName);
     sessionStorage.setItem("ProtocolsFollowCategoryNameSelected", CategoryName);
+    sessionStorage.setItem("ProtocolsFollowProtocolIndicationsSelected", Indications || "");
+    sessionStorage.setItem("ProtocolsFollowProtocolWarningsSelected", Warnings || "");
+    SetProtocolsFollowInformation(Indications, Warnings);
     SetProtocolsFollowTitle(CategoryName, ProtocolName);
     HideModal("SelectProtocolsFollowProtocolModal");
     LoadProtocolsFollowSteps();
@@ -268,6 +279,19 @@ function ShowProtocolsFollowEmpty(Message) {
     const EmptyState = document.getElementById("ProtocolsFollowEmptyState");
     EmptyState.classList.remove("d-none");
     EmptyState.querySelector("p").innerText = Message;
+}
+
+function SetProtocolsFollowInformation(Indications, Warnings) {
+    SelectedProtocolIndications = Indications || "";
+    SelectedProtocolWarnings = Warnings || "";
+    document.getElementById("BtnProtocolsFollowIndications").disabled = SelectedProtocolIndications.trim().length === 0;
+    document.getElementById("BtnProtocolsFollowWarnings").disabled = SelectedProtocolWarnings.trim().length === 0;
+}
+
+function OpenProtocolsFollowTextModal(Text, Title) {
+    document.getElementById("ProtocolsFollowTextModalLabel").innerText = Title;
+    document.getElementById("ProtocolsFollowTextModalBody").value = Text || "";
+    ShowModal("ProtocolsFollowTextModal");
 }
 
 function ShowModal(Id) {
