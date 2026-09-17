@@ -1,4 +1,4 @@
-let SelectedProtocolId = null;
+﻿let SelectedProtocolId = null;
 let SelectedProtocolIndications = "";
 let SelectedProtocolWarnings = "";
 let ProtocolFollowSteps = [];
@@ -35,7 +35,7 @@ async function SelectProtocolsFollowProtocolModalOpen() {
 
 async function LoadProtocolsFollowProtocols() {
     const Container = document.getElementById("ProtocolsFollowProtocolsList");
-    Container.innerHTML = '<div class="text-center text-body-secondary"><span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Cargando...</div>';
+    Container.innerHTML = '<div class="text-center text-body-secondary"><span class="spinner-border spinner-border-sm" role="status"><span class="visually-hidden">Loading...</span></span></div>';
     try {
         const [CategoriesResponse, ProtocolsResponse] = await Promise.all([
             fetch("/ProtocolsFollow/GetCategoriesSelect"),
@@ -180,7 +180,7 @@ function RenderProtocolsFollowStep() {
             </div>
             <div class="protocols-follow-step-instruction"></div>
             <div id="ProtocolsFollowImageCarousel" class="protocols-follow-image-carousel">
-                <div class="text-body-secondary"><span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Cargando imágenes...</div>
+                <div class="text-body-secondary"><span class="spinner-border spinner-border-sm" role="status"><span class="visually-hidden">Loading...</span></span></div>
             </div>
         </div>
         <div class="protocols-follow-step-navigation">

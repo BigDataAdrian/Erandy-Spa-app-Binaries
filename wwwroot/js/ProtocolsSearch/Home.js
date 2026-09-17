@@ -1,4 +1,4 @@
-let SelectedProtocolId = null;
+﻿let SelectedProtocolId = null;
 let SelectedStepId = null;
 let SelectedProtocolIndications = "";
 let SelectedProtocolWarnings = "";
@@ -32,7 +32,7 @@ async function SelectProtocolsSearchProtocolModalOpen() {
 
 async function LoadProtocolsSearchProtocols() {
     const Container = document.getElementById("ProtocolsSearchProtocolsList");
-    Container.innerHTML = '<div class="text-center text-body-secondary"><span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Cargando...</div>';
+    Container.innerHTML = '<div class="text-center text-body-secondary"><span class="spinner-border spinner-border-sm" role="status"><span class="visually-hidden">Loading...</span></span></div>';
     try {
         const [CategoriesResponse, ProtocolsResponse] = await Promise.all([
             fetch("/ProtocolsSearch/GetCategoriesSelect"),
@@ -98,7 +98,7 @@ function SelectProtocolsSearchProtocol(Id, CategoryName, ProtocolName, Indicatio
 async function LoadProtocolsSteps() {
     if (!SelectedProtocolId) return;
     const Tbody = document.querySelector("#ProtocolsSearchTable tbody");
-    Tbody.innerHTML = '<tr><td colspan="4" class="text-center text-body-secondary"><span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Cargando...</td></tr>';
+    Tbody.innerHTML = '<tr><td colspan="4" class="text-center text-body-secondary"><span class="spinner-border spinner-border-sm" role="status"><span class="visually-hidden">Loading...</span></span></td></tr>';
     try {
         const Response = await fetch(`/ProtocolsSearch/GetProtocolsSteps?ProtocolId=${SelectedProtocolId}`);
         if (!Response.ok) throw new Error(await Response.text());
@@ -151,7 +151,7 @@ function OpenProtocolSearchImages(StepId, StepName) {
 
 async function LoadProtocolSearchImages() {
     const Container = document.getElementById("ProtocolsSearchImagesGrid");
-    Container.innerHTML = '<div class="text-center text-body-secondary"><span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Cargando...</div>';
+    Container.innerHTML = '<div class="text-center text-body-secondary"><span class="spinner-border spinner-border-sm" role="status"><span class="visually-hidden">Loading...</span></span></div>';
     try {
         const Response = await fetch(`/ProtocolsSearch/GetProtocolStepImages?StepId=${SelectedStepId}`);
         if (!Response.ok) throw new Error(await Response.text());

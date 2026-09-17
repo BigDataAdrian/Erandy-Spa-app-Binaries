@@ -1,4 +1,4 @@
-let SelectedProtocolId = null;
+﻿let SelectedProtocolId = null;
 let SelectedStepId = null;
 let SelectedStepFileId = null;
 let SelectedStepFile = null;
@@ -58,7 +58,7 @@ async function SelectProtocolsStepsProtocolModalOpen() {
 
 async function LoadProtocolsStepsProtocols() {
     const Container = document.getElementById("ProtocolsStepsProtocolsList");
-    Container.innerHTML = '<div class="text-center text-body-secondary"><span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Cargando...</div>';
+    Container.innerHTML = '<div class="text-center text-body-secondary"><span class="spinner-border spinner-border-sm" role="status"><span class="visually-hidden">Loading...</span></span></div>';
     try {
         const [CategoriesResponse, ProtocolsResponse] = await Promise.all([
             fetch("/ProtocolsSteps/GetCategoriesSelect"),
@@ -122,7 +122,7 @@ function SelectProtocolsStepsProtocol(Id, CategoryName, ProtocolName) {
 async function LoadProtocolsSteps() {
     if (!SelectedProtocolId) return;
     const Tbody = document.querySelector("#ProtocolsStepsTable tbody");
-    Tbody.innerHTML = '<tr><td colspan="5" class="text-center text-body-secondary"><span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Cargando...</td></tr>';
+    Tbody.innerHTML = '<tr><td colspan="5" class="text-center text-body-secondary"><span class="spinner-border spinner-border-sm" role="status"><span class="visually-hidden">Loading...</span></span></td></tr>';
     try {
         const Response = await fetch(`/ProtocolsSteps/GetProtocolsSteps?ProtocolId=${SelectedProtocolId}`);
         if (!Response.ok) throw new Error(await Response.text());
@@ -279,7 +279,7 @@ function OpenProtocolStepFiles(StepId, StepName) {
 
 async function LoadProtocolStepFiles() {
     const Tbody = document.querySelector("#ProtocolStepFilesTable tbody");
-    Tbody.innerHTML = '<tr><td colspan="3" class="text-center text-body-secondary"><span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Cargando...</td></tr>';
+    Tbody.innerHTML = '<tr><td colspan="3" class="text-center text-body-secondary"><span class="spinner-border spinner-border-sm" role="status"><span class="visually-hidden">Loading...</span></span></td></tr>';
     try {
         const Response = await fetch(`/ProtocolsSteps/GetProtocolStepFiles?StepId=${SelectedStepId}`);
         if (!Response.ok) throw new Error(await Response.text());
