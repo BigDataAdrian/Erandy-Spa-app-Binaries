@@ -1,7 +1,10 @@
 const CouponsById = new Map();
+let CouponStartDate = "";
+let CouponEndDate = "";
 
 document.addEventListener("DOMContentLoaded", () => {
     setActiveMenu("CouponsModule", "CouponsModuleHome");
+    InitializeCouponFilterDates();
     LoadCoupons();
     LoadCouponSelects();
     InitTooltips();
@@ -11,6 +14,16 @@ document.addEventListener("DOMContentLoaded", () => {
     const BtnDeleteCoupon = document.getElementById('BtnDeleteCoupon');
     BtnDeleteCoupon.addEventListener('click', async () => {
         await DeleteCoupon();
+    });
+
+    const BtnFilterCouponsModal = document.getElementById('BtnFilterCouponsModal');
+    BtnFilterCouponsModal.addEventListener('click', () => {
+        FilterCouponsModalOpen();
+    });
+
+    const BtnApplyCouponFilter = document.getElementById('BtnApplyCouponFilter');
+    BtnApplyCouponFilter.addEventListener('click', async () => {
+        await ApplyCouponFilter();
     });
 
     const BtnCreateCouponModal = document.getElementById('BtnCreateCouponModal');
@@ -29,11 +42,67 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 });
 
-async function LoadCoupons() {
-    const tbody = document.querySelector("#CouponsTable tbody");
+function InitializeCouponFilterDates() {
+    CouponStartDate = GetCurrentDateInputValue();
+    CouponEndDate = CouponStartDate;
+    document.getElementById("FilterModalStartDate").value = CouponStartDate;
+    document.getElementById("FilterModalEndDate").value = CouponEndDate;
+}
+
+function FilterCouponsModalOpen() {
+    document.getElementById("FilterModalStartDate").value = CouponStartDate;
+    document.getElementById("FilterModalEndDate").value = CouponEndDate;
+    const FilterCouponsModal = new bootstrap.Modal(document.getElementById("FilterCouponsModal"));
+    FilterCouponsModal.show();
+}
+
+async function ApplyCouponFilter() {
+    const StartDate = document.getElementById("FilterModalStartDate").value;
+    const EndDate = document.getElementById("FilterModalEndDate").value;
+
+    if (!StartDate || !EndDate) {
+        showToast("warning", "Seleccione la fecha inicial y la fecha final");
+        return;
+    }
+
+    if (EndDate < StartDate) {
+        showToast("warning", "La fecha final no puede ser menor que la fecha inicial");
+        return;
+    }
 
     try {
-        const response = await fetch(`/Coupons/GetCoupons`, {
+        SetButtonLoading('BtnApplyCouponFilter', 'SpinnerApplyCouponFilter', 'IconApplyCouponFilter', 'Cargando...');
+        CouponStartDate = StartDate;
+        CouponEndDate = EndDate;
+        await LoadCoupons();
+
+        const modalElement = document.getElementById('FilterCouponsModal');
+        const modalInstance = bootstrap.Modal.getInstance(modalElement);
+        if (modalInstance) modalInstance.hide();
+    } catch (error) {
+        showToast("danger", error);
+    } finally {
+        ClearButtonLoading('BtnApplyCouponFilter', 'SpinnerApplyCouponFilter', 'IconApplyCouponFilter');
+    }
+}
+
+function GetCurrentDateInputValue() {
+    const DateValue = new Date();
+    const Year = DateValue.getFullYear();
+    const Month = String(DateValue.getMonth() + 1).padStart(2, '0');
+    const Day = String(DateValue.getDate()).padStart(2, '0');
+    return `${Year}-${Month}-${Day}`;
+}
+
+async function LoadCoupons() {
+    const tbody = document.querySelector("#CouponsTable tbody");
+    const Query = new URLSearchParams({
+        StartDate: CouponStartDate,
+        EndDate: CouponEndDate
+    });
+
+    try {
+        const response = await fetch(`/Coupons/GetCoupons?${Query.toString()}`, {
             method: "GET",
             headers: {
                 "Content-Type": "application/json"

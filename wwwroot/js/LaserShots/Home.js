@@ -3,23 +3,38 @@ let LaserShotSearchControllers = {};
 
 document.addEventListener("DOMContentLoaded", () => {
     setActiveMenu("LaserShotsModule", "LaserShotsModuleHome");
+    SetDefaultLaserShotDates();
     LoadLaserShots();
     LoadLaserShotTherapists();
     InitTooltips();
     InitLaserShotCustomerSearch("CreateModal");
     InitLaserShotCustomerSearch("UpdateModal");
 
+    document.getElementById("BtnFilterLaserShotsModal").addEventListener("click", () => OpenLaserShotFilterModal());
+    document.getElementById("BtnApplyLaserShotFilter").addEventListener("click", () => ApplyLaserShotFilter());
     document.getElementById("BtnCreateLaserShotModal").addEventListener("click", () => CreateLaserShotModalOpen());
     document.getElementById("BtnCreateLaserShot").addEventListener("click", () => AddLaserShot());
     document.getElementById("BtnUpdateLaserShot").addEventListener("click", () => UpdateLaserShot());
     document.getElementById("BtnDeleteLaserShot").addEventListener("click", () => DeleteLaserShot());
 });
 
-async function LoadLaserShots() {
+async function LoadLaserShots(ButtonId = "") {
+    const StartDate = document.getElementById("FilterModalStartDate").value;
+    const EndDate = document.getElementById("FilterModalEndDate").value;
     const Tbody = document.querySelector("#LaserShotsTable tbody");
 
+    if (!StartDate || !EndDate) {
+        showToast("warning", "Debe seleccionar la fecha inicial y la fecha final");
+        return false;
+    }
+    if (StartDate > EndDate) {
+        showToast("warning", "La fecha inicial no puede ser mayor que la fecha final");
+        return false;
+    }
+
     try {
-        const Response = await fetch("/LaserShots/GetLaserShots", {
+        if (ButtonId) SetButtonLoading(ButtonId, "Cargando...");
+        const Response = await fetch(`/LaserShots/GetLaserShots?StartDate=${encodeURIComponent(StartDate)}&EndDate=${encodeURIComponent(EndDate)}`, {
             method: "GET",
             headers: { "Content-Type": "application/json" }
         });
@@ -27,6 +42,10 @@ async function LoadLaserShots() {
         if (Response.status >= 200 && Response.status <= 299) {
             const Result = await Response.json().catch(() => []);
             Tbody.replaceChildren();
+
+            if (!Result.length) {
+                Tbody.innerHTML = '<tr><td colspan="6" class="text-center text-body-secondary">No hay registros para el rango seleccionado.</td></tr>';
+            }
 
             Result.forEach(LaserShot => {
                 const Row = document.createElement("tr");
@@ -69,6 +88,7 @@ async function LoadLaserShots() {
 
             document.getElementById("LaserShotsCount").innerText = Result.length;
             InitTooltips();
+            return true;
         }
 
         if (Response.status >= 400 && Response.status <= 499) {
@@ -80,8 +100,30 @@ async function LoadLaserShots() {
         }
     } catch (Error) {
         showToast("danger", Error.message || Error);
+    } finally {
+        if (ButtonId) ClearButtonLoading(ButtonId);
+    }
+
+    return false;
+}
+
+function SetDefaultLaserShotDates() {
+    const Today = new Date();
+    const Value = `${Today.getFullYear()}-${String(Today.getMonth() + 1).padStart(2, "0")}-${String(Today.getDate()).padStart(2, "0")}`;
+    document.getElementById("FilterModalStartDate").value = Value;
+    document.getElementById("FilterModalEndDate").value = Value;
+}
+
+function OpenLaserShotFilterModal() {
+    bootstrap.Modal.getOrCreateInstance(document.getElementById("FilterLaserShotsModal")).show();
+}
+
+async function ApplyLaserShotFilter() {
+    if (await LoadLaserShots("BtnApplyLaserShotFilter")) {
+        bootstrap.Modal.getOrCreateInstance(document.getElementById("FilterLaserShotsModal")).hide();
     }
 }
+
 
 async function LoadLaserShotTherapists() {
     try {
