@@ -40,6 +40,16 @@
     border-radius: .375rem;
     background-color: #f8f9fa;
 }
+.table-prices-container {
+    max-height: 50vh;
+    overflow-y: auto;
+}
+
+.question-text {
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
 .modal-header-tools {
     display: flex;
     align-items: center;

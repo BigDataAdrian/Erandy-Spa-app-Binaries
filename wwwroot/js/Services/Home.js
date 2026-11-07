@@ -63,6 +63,36 @@
     UpdateDeletePictureBtn.addEventListener('click', async () => {
         document.getElementById('UpdatepictureNameInput').value="";
     });
+
+    const BtnCreateServicePrice = document.getElementById('BtnCreateServicePrice');
+    BtnCreateServicePrice.addEventListener('click', async () => {
+        await AddServicePrice();
+    });
+
+    const BtnUpdateServicePrice = document.getElementById('BtnUpdateServicePrice');
+    BtnUpdateServicePrice.addEventListener('click', async () => {
+        await UpdateServicePrice();
+    });
+
+    const BtnDeleteServicePrice = document.getElementById('BtnDeleteServicePrice');
+    BtnDeleteServicePrice.addEventListener('click', async () => {
+        await DeleteServicePrice();
+    });
+
+    const BtnCreateServiceQuestion = document.getElementById('BtnCreateServiceQuestion');
+    BtnCreateServiceQuestion.addEventListener('click', async () => {
+        await AddServiceQuestion();
+    });
+
+    const BtnUpdateServiceQuestion = document.getElementById('BtnUpdateServiceQuestion');
+    BtnUpdateServiceQuestion.addEventListener('click', async () => {
+        await UpdateServiceQuestion();
+    });
+
+    const BtnDeleteServiceQuestion = document.getElementById('BtnDeleteServiceQuestion');
+    BtnDeleteServiceQuestion.addEventListener('click', async () => {
+        await DeleteServiceQuestion();
+    });
 });
 async function LoadCategories() {
     try {
@@ -156,6 +186,12 @@ async function LoadServices() {
                             </button>
                             <button onclick="UpdateServiceModalOpen(${c.id})" class="btn btn-outline-warning">
                                 <i class="bi bi-pencil"></i>
+                            </button>
+                            <button onclick="ServicePricesModalOpen(${c.id},'${c.name}')" title="Precios" class="btn btn-outline-info">
+                                <i class="bi bi-currency-dollar"></i>
+                            </button>
+                            <button onclick="ServiceQuestionsModalOpen(${c.id},'${c.name}')" title="Preguntas frecuentes" class="btn btn-outline-primary">
+                                <i class="bi bi-question-circle"></i>
                             </button>
                         </div>
                     </td>
@@ -501,5 +537,413 @@ async function UploadPicture(file) {
     } catch (error) {
         console.error(error);
         showToast("danger", "Ocurrió un error al intentar subir la imagen");
+    }
+}
+async function ServicePricesModalOpen(ServiceId, ServiceName) {
+    sessionStorage.setItem('ServiceIdSelected', ServiceId);
+    document.getElementById("LabelModalServicePrices").innerText = ServiceName;
+    await LoadServicePrices();
+    var ServicePricesModal = bootstrap.Modal.getOrCreateInstance(document.getElementById("ServicePricesModal"));
+    ServicePricesModal.show();
+}
+async function LoadServicePrices() {
+    try {
+        const ServiceId = sessionStorage.getItem('ServiceIdSelected');
+        const response = await fetch(`/Services/GetServicePrices?ServiceId=` + ServiceId, {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json"
+            }
+        });
+
+        if (response.status >= 200 && response.status <= 299) {
+            const result = await response.json().catch(() => null);
+            const tbody = document.querySelector("#ServicePricesTable tbody");
+
+            tbody.innerHTML = "";
+
+            if (result.length == 0) {
+                tbody.innerHTML = `<tr><td colspan="3" class="text-center text-body-secondary">Sin precios registrados</td></tr>`;
+            }
+
+            result.forEach(c => {
+                const tr = document.createElement("tr");
+
+                tr.setAttribute("data-id", c.id);
+                tr.innerHTML = `
+                    <td>${c.name}</td>
+                    <td>$${c.price}</td>
+                    <td>
+                        <div class="btn-group float-end" role="group" aria-label="Acciones">
+                            <button onclick="DeleteServicePriceModalOpen(${c.id},'${c.name}')" title="Eliminar precio" data-bs-target="#DeleteServicePriceModal" data-bs-toggle="modal" class="btn btn-outline-danger">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                            <button onclick="UpdateServicePriceModalOpen(${c.id},'${c.name}',${c.price})" title="Editar precio" data-bs-target="#UpdateServicePriceModal" data-bs-toggle="modal" class="btn btn-outline-warning">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                        </div>
+                    </td>
+                `;
+
+                tbody.appendChild(tr);
+            });
+        }
+
+        if (response.status >= 400 && response.status <= 499) {
+            const result = await response.text().catch(() => null);
+            showToast("warning", result);
+        }
+
+        if (response.status >= 500 && response.status <= 599) {
+            const result = await response.text().catch(() => null);
+            showToast("danger", result);
+        }
+
+    } catch (error) {
+        showToast("danger", error);
+    }
+}
+async function AddServicePrice() {
+    try {
+        const ServiceId = sessionStorage.getItem('ServiceIdSelected');
+        const Name = document.getElementById("CreateServicePriceModalName");
+        const Price = document.getElementById("CreateServicePriceModalPrice");
+
+        const data = {
+            ServiceId: ServiceId,
+            Name: Name.value,
+            Price: Price.value
+        };
+        const response = await fetch("/Services/AddServicePrice", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(data)
+        });
+
+        if (response.status >= 200 && response.status <= 299) {
+            const result = await response.text().catch(() => null);
+            Name.value = "";
+            Price.value = "";
+
+            showToast("success", result);
+            const modalElement = document.getElementById('CreateServicePriceModal');
+            const modalInstance = bootstrap.Modal.getInstance(modalElement);
+            if (modalInstance) {
+                modalInstance.hide();
+            }
+
+            await LoadServicePrices();
+            bootstrap.Modal.getOrCreateInstance(document.getElementById("ServicePricesModal")).show();
+        }
+
+        if (response.status >= 400 && response.status <= 499) {
+            const result = await response.text().catch(() => null);
+            showToast("warning", result);
+        }
+
+        if (response.status >= 500 && response.status <= 599) {
+            const result = await response.text().catch(() => null);
+            showToast("danger", result);
+        }
+    } catch (error) {
+        showToast("danger", error);
+    }
+}
+function UpdateServicePriceModalOpen(Id, Name, Price) {
+    sessionStorage.setItem('ServicePriceIdSelected', Id);
+    document.getElementById("UpdateServicePriceModalName").value = Name;
+    document.getElementById("UpdateServicePriceModalPrice").value = Price;
+}
+async function UpdateServicePrice() {
+    try {
+        const Id = sessionStorage.getItem('ServicePriceIdSelected');
+        const Name = document.getElementById("UpdateServicePriceModalName");
+        const Price = document.getElementById("UpdateServicePriceModalPrice");
+
+        const data = {
+            Id: Id,
+            Name: Name.value,
+            Price: Price.value
+        };
+        const response = await fetch("/Services/UpdateServicePrice", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(data)
+        });
+
+        if (response.status >= 200 && response.status <= 299) {
+            const result = await response.text().catch(() => null);
+            showToast("success", result);
+            const modalElement = document.getElementById('UpdateServicePriceModal');
+            const modalInstance = bootstrap.Modal.getInstance(modalElement);
+            if (modalInstance) {
+                modalInstance.hide();
+            }
+
+            await LoadServicePrices();
+            bootstrap.Modal.getOrCreateInstance(document.getElementById("ServicePricesModal")).show();
+        }
+
+        if (response.status >= 400 && response.status <= 499) {
+            const result = await response.text().catch(() => null);
+            showToast("warning", result);
+        }
+
+        if (response.status >= 500 && response.status <= 599) {
+            const result = await response.text().catch(() => null);
+            showToast("danger", result);
+        }
+    } catch (error) {
+        showToast("danger", error);
+    }
+}
+function DeleteServicePriceModalOpen(Id, Name) {
+    sessionStorage.setItem('ServicePriceIdSelected', Id);
+    document.getElementById("LabelModalDeleteServicePrice").innerText = Name;
+}
+async function DeleteServicePrice() {
+    try {
+        const Id = sessionStorage.getItem('ServicePriceIdSelected');
+        const response = await fetch(`/Services/DeleteServicePrice?ServicePriceId=${Id}`, {
+            method: "DELETE",
+            headers: {
+                "Content-Type": "application/json"
+            }
+        });
+
+        if (response.status >= 200 && response.status <= 299) {
+            const result = await response.text().catch(() => null);
+            showToast("success", result);
+            const modalElement = document.getElementById('DeleteServicePriceModal');
+            const modalInstance = bootstrap.Modal.getInstance(modalElement);
+            if (modalInstance) {
+                modalInstance.hide();
+            }
+
+            await LoadServicePrices();
+            bootstrap.Modal.getOrCreateInstance(document.getElementById("ServicePricesModal")).show();
+        }
+
+        if (response.status >= 400 && response.status <= 499) {
+            const result = await response.text().catch(() => null);
+            showToast("warning", result);
+        }
+
+        if (response.status >= 500 && response.status <= 599) {
+            const result = await response.text().catch(() => null);
+            showToast("danger", result);
+        }
+    } catch (error) {
+        showToast("danger", error);
+    }
+}
+async function ServiceQuestionsModalOpen(ServiceId, ServiceName) {
+    sessionStorage.setItem('ServiceIdSelected', ServiceId);
+    document.getElementById("LabelModalServiceQuestions").innerText = ServiceName;
+    await LoadServiceQuestions();
+    var ServiceQuestionsModal = bootstrap.Modal.getOrCreateInstance(document.getElementById("ServiceQuestionsModal"));
+    ServiceQuestionsModal.show();
+}
+async function LoadServiceQuestions() {
+    try {
+        const ServiceId = sessionStorage.getItem('ServiceIdSelected');
+        const response = await fetch(`/Services/GetServiceQuestions?ServiceId=` + ServiceId, {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json"
+            }
+        });
+
+        if (response.status >= 200 && response.status <= 299) {
+            const result = await response.json().catch(() => null);
+            const tbody = document.querySelector("#ServiceQuestionsTable tbody");
+
+            tbody.innerHTML = "";
+
+            if (result.length == 0) {
+                tbody.innerHTML = `<tr><td colspan="3" class="text-center text-body-secondary">Sin preguntas registradas</td></tr>`;
+            }
+
+            result.forEach(c => {
+                const tr = document.createElement("tr");
+
+                tr.setAttribute("data-id", c.id);
+                tr.innerHTML = `
+                    <td class="question-text"></td>
+                    <td class="question-text"></td>
+                    <td>
+                        <div class="btn-group float-end" role="group" aria-label="Acciones">
+                            <button onclick="DeleteServiceQuestionModalOpen(${c.id})" title="Eliminar pregunta" data-bs-target="#DeleteServiceQuestionModal" data-bs-toggle="modal" class="btn btn-outline-danger">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                            <button onclick="UpdateServiceQuestionModalOpen(${c.id})" title="Editar pregunta" data-bs-target="#UpdateServiceQuestionModal" data-bs-toggle="modal" class="btn btn-outline-warning">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                        </div>
+                    </td>
+                `;
+                tr.cells[0].textContent = c.question;
+                tr.cells[1].textContent = c.answer;
+
+                tbody.appendChild(tr);
+            });
+        }
+
+        if (response.status >= 400 && response.status <= 499) {
+            const result = await response.text().catch(() => null);
+            showToast("warning", result);
+        }
+
+        if (response.status >= 500 && response.status <= 599) {
+            const result = await response.text().catch(() => null);
+            showToast("danger", result);
+        }
+
+    } catch (error) {
+        showToast("danger", error);
+    }
+}
+async function AddServiceQuestion() {
+    try {
+        const ServiceId = sessionStorage.getItem('ServiceIdSelected');
+        const Question = document.getElementById("CreateServiceQuestionModalQuestion");
+        const Answer = document.getElementById("CreateServiceQuestionModalAnswer");
+
+        const data = {
+            ServiceId: ServiceId,
+            Question: Question.value,
+            Answer: Answer.value
+        };
+        const response = await fetch("/Services/AddServiceQuestion", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(data)
+        });
+
+        if (response.status >= 200 && response.status <= 299) {
+            const result = await response.text().catch(() => null);
+            Question.value = "";
+            Answer.value = "";
+
+            showToast("success", result);
+            const modalElement = document.getElementById('CreateServiceQuestionModal');
+            const modalInstance = bootstrap.Modal.getInstance(modalElement);
+            if (modalInstance) {
+                modalInstance.hide();
+            }
+
+            await LoadServiceQuestions();
+            bootstrap.Modal.getOrCreateInstance(document.getElementById("ServiceQuestionsModal")).show();
+        }
+
+        if (response.status >= 400 && response.status <= 499) {
+            const result = await response.text().catch(() => null);
+            showToast("warning", result);
+        }
+
+        if (response.status >= 500 && response.status <= 599) {
+            const result = await response.text().catch(() => null);
+            showToast("danger", result);
+        }
+    } catch (error) {
+        showToast("danger", error);
+    }
+}
+function UpdateServiceQuestionModalOpen(Id) {
+    const Row = document.querySelector(`#ServiceQuestionsTable tr[data-id="${Id}"]`);
+    sessionStorage.setItem('ServiceQuestionIdSelected', Id);
+    document.getElementById("UpdateServiceQuestionModalQuestion").value = Row.cells[0].textContent;
+    document.getElementById("UpdateServiceQuestionModalAnswer").value = Row.cells[1].textContent;
+}
+async function UpdateServiceQuestion() {
+    try {
+        const Id = sessionStorage.getItem('ServiceQuestionIdSelected');
+        const Question = document.getElementById("UpdateServiceQuestionModalQuestion");
+        const Answer = document.getElementById("UpdateServiceQuestionModalAnswer");
+
+        const data = {
+            Id: Id,
+            Question: Question.value,
+            Answer: Answer.value
+        };
+        const response = await fetch("/Services/UpdateServiceQuestion", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(data)
+        });
+
+        if (response.status >= 200 && response.status <= 299) {
+            const result = await response.text().catch(() => null);
+            showToast("success", result);
+            const modalElement = document.getElementById('UpdateServiceQuestionModal');
+            const modalInstance = bootstrap.Modal.getInstance(modalElement);
+            if (modalInstance) {
+                modalInstance.hide();
+            }
+
+            await LoadServiceQuestions();
+            bootstrap.Modal.getOrCreateInstance(document.getElementById("ServiceQuestionsModal")).show();
+        }
+
+        if (response.status >= 400 && response.status <= 499) {
+            const result = await response.text().catch(() => null);
+            showToast("warning", result);
+        }
+
+        if (response.status >= 500 && response.status <= 599) {
+            const result = await response.text().catch(() => null);
+            showToast("danger", result);
+        }
+    } catch (error) {
+        showToast("danger", error);
+    }
+}
+function DeleteServiceQuestionModalOpen(Id) {
+    const Row = document.querySelector(`#ServiceQuestionsTable tr[data-id="${Id}"]`);
+    sessionStorage.setItem('ServiceQuestionIdSelected', Id);
+    document.getElementById("LabelModalDeleteServiceQuestion").innerText = Row.cells[0].textContent;
+}
+async function DeleteServiceQuestion() {
+    try {
+        const Id = sessionStorage.getItem('ServiceQuestionIdSelected');
+        const response = await fetch(`/Services/DeleteServiceQuestion?ServiceQuestionId=${Id}`, {
+            method: "DELETE",
+            headers: {
+                "Content-Type": "application/json"
+            }
+        });
+
+        if (response.status >= 200 && response.status <= 299) {
+            const result = await response.text().catch(() => null);
+            showToast("success", result);
+            const modalElement = document.getElementById('DeleteServiceQuestionModal');
+            const modalInstance = bootstrap.Modal.getInstance(modalElement);
+            if (modalInstance) {
+                modalInstance.hide();
+            }
+
+            await LoadServiceQuestions();
+            bootstrap.Modal.getOrCreateInstance(document.getElementById("ServiceQuestionsModal")).show();
+        }
+
+        if (response.status >= 400 && response.status <= 499) {
+            const result = await response.text().catch(() => null);
+            showToast("warning", result);
+        }
+
+        if (response.status >= 500 && response.status <= 599) {
+            const result = await response.text().catch(() => null);
+            showToast("danger", result);
+        }
+    } catch (error) {
+        showToast("danger", error);
     }
 }
